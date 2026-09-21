@@ -1,0 +1,38 @@
+header {
+    display: flex;
+    justify-content: space-evenly;
+}
+
+.title {
+    text-align: center;
+}
+
+form {
+    display: grid;
+    grid-template-areas: "titulo titulo"
+                        "primeiroNome ultimoNome"
+                        "Email Senha"
+                        "pais pais"
+                        "submit submit";
+}
+
+.titulo{
+    grid-area: titulo;
+}
+
+.firstName{
+    grid-area: primeiroNome;
+}
+
+.lastName {
+    grid-area: ultimoNome;
+}
+
+.pais {
+    grid-area: pais;
+}
+
+.submit {
+    grid-area: submit;
+    width: 20em;
+}
