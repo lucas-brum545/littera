@@ -1,0 +1,127 @@
+/* Estilos Globais básicos */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Montserrat', sans-serif;
+}
+
+.titulo_menu{
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #00040a;
+  text-align: center;
+  padding: 20px;
+}
+
+body {
+    display: flex;
+    background-color: #f4f6f9;
+}
+
+/* Menu Aside Lateral */
+.sidebar {
+    width: 220px;
+    height: 100vh;
+    background-color: #f8f9fa;
+    color: #fbfbfc;
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0;
+    left: 0;
+    box-shadow: 4px 0 10px rgba(0, 0, 0, 0.1);
+    padding: 10px;
+}
+
+.sidebar-header {
+    padding: 0px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    background-color: #f5f6f8;
+    text-align: center;
+    color:#00040a;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 900;
+    font-size: 1rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 50px;
+}
+
+.sidebar-nav {
+    flex: 1;
+    padding: 20px 0;
+    overflow-y: auto;
+}
+
+.sidebar-nav ul {
+    list-style: none;
+}
+
+.sidebar-nav a {
+    display: block;
+    padding: 12px 20px;
+    color: #000913;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    font-size: 0.95rem;
+}
+
+.sidebar-nav a:hover {
+    background-color: #575555;
+    color: #ffffff;
+    padding-left: 25px;
+}
+
+/* Submenu */
+.has-submenu > a::after {
+    content: ' ▼';
+    font-size: 0.7rem;
+    float: right;
+    line-height: 1.5;
+}
+
+.submenu {
+    background-color: #ecedf0;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
+}
+
+/* Abre o submenu ao passar o mouse */
+.has-submenu:hover .submenu {
+    max-height: 200px; 
+}
+
+.submenu li a {
+    padding-left: 35px;
+    font-size: 0.85rem;
+    color: #070707;
+}
+
+.submenu li a:hover {
+    color: #ffffff;
+    background-color: #575555;
+}
+
+/* Botão Sair na parte inferior */
+.logout {
+    margin-top: auto;
+}
+
+.logout a {
+    color: #f87171;
+}
+
+.logout a:hover {
+    background-color: #7f1d1d;
+    color: #ffffff;
+}
+
+/* Área de conteúdo principal para demonstração */
+.main-content {
+    margin-left: 260px;
+    padding: 30px;
+    width: calc(100% - 260px);
+}
