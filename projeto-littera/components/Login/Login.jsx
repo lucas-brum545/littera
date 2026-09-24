@@ -2,7 +2,7 @@ import { useState } from "react";
 import { FaUser, FaLock } from "react-icons/fa";
 import logoLittera from '../../assets/Littera-logo.png'; // Ajuste o caminho conforme a estrutura da sua pasta
 import "./Login.css";
-import MenuAside from "../MenuAside/MenuAside";
+import MenuAside from "../MenuAside/MenuAside.jsx";
 
 const Login = () => {
   // Estados para armazenar as entradas do usuário

@@ -1,14 +1,23 @@
 import { useState } from 'react';
 import Login from '../Login/Login';
 import Footer from '../Footer/Footer';
+import GerenciamentoLeitores from '../GerenciamentoLeitores/GerenciamentoLeitores'
 import './MenuAside.css';
 
 export default function MenuAside() {
     const [saiu, setSaiu] = useState(false);
+    const [clicouGerLeitores, setClicouGerLeitores] = useState(false)
+    const [clicouGerAcervo, setClicouGerAcervo] = useState(false)
+    const [clicouGerEmprestimos, setClicouGerEmprestimos] = useState(false)
 
     function sair(e) {
         e.preventDefault(); // Evita que a página recarregue ou suba ao clicar no link
         setSaiu(true);
+    }
+
+    function clicarGerLeitores(e){
+        e.preventDefault(); // Evita que a página recarregue ou suba ao clicar no link
+        setClicouGerLeitores(true);
     }
 
     // Se o estado 'saiu' for verdadeiro, renderiza a tela de login diretamente
@@ -16,20 +25,8 @@ export default function MenuAside() {
         return <Login />;
     }
 
-    function gerLeitores(){
-        return <GerenciamentoLeitores></GerenciamentoLeitores> // pegar a parte da karol
-    }
-
-    function gerAcervo(){
-        return 
-    }
-
-    function gerLeitores(){
-        return
-    }
-    
-    function gerEmprestimos(){
-        return
+    if (clicouGerLeitores){
+        return <GerenciamentoLeitores></GerenciamentoLeitores>;
     }
 
     return (
@@ -42,9 +39,12 @@ export default function MenuAside() {
                         <li className="has-submenu">
                             <a href="#">Gerenciamento</a>
                             <ul className="submenu">
-                                <li><a href="#" onClick={gerLeitores}>Leitores</a></li>
-                                <li><a href="#" onClick={gerAcervo}>Acervo</a></li>
-                                <li><a href="#" onClick={gerEmprestimos}>Empréstimos</a></li>
+                                {/* parte da karol */}
+                                <li><a href="#" onClick={clicarGerLeitores}>Leitores</a></li>
+                                {/* parte do luiz */}
+                                <li><a href="#" onClick={clicouGerAcervo}>Acervo</a></li> 
+                                {/* parte da viviane */}
+                                <li><a href="#" onClick={clicouGerEmprestimos}>Empréstimos</a></li>
                             </ul>
                         </li>
                         <li className="logout">
