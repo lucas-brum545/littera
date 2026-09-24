@@ -1,0 +1,148 @@
+```css
+.gerenciamento-leitores {
+  padding: 32px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.cabecalho-leitores {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+}
+
+.cabecalho-leitores h1 {
+  margin: 0 0 8px;
+}
+
+.cabecalho-leitores p {
+  margin: 0;
+  color: #666;
+}
+
+.botao-novo {
+  border: none;
+  background: #2c3e50;
+  color: white;
+  padding: 12px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 15px;
+}
+
+.botao-novo:hover {
+  opacity: 0.9;
+}
+
+.barra-pesquisa {
+  margin-bottom: 20px;
+}
+
+.barra-pesquisa input {
+  width: 100%;
+  max-width: 500px;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  box-sizing: border-box;
+  font-size: 15px;
+}
+
+.formulario-leitor {
+  background: #f7f7f7;
+  padding: 24px;
+  border-radius: 8px;
+  margin-bottom: 25px;
+  max-width: 600px;
+}
+
+.formulario-leitor h2 {
+  margin-top: 0;
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 15px;
+}
+
+.campo label {
+  margin-bottom: 6px;
+  font-weight: bold;
+}
+
+.campo input {
+  padding: 11px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 15px;
+}
+
+.acoes-formulario {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.acoes-formulario button,
+.acoes button {
+  border: none;
+  padding: 9px 14px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.botao-salvar {
+  background: #2c3e50;
+  color: white;
+}
+
+.botao-cancelar {
+  background: #ddd;
+  color: #333;
+}
+
+.tabela-container {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.tabela-container table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+}
+
+.tabela-container th,
+.tabela-container td {
+  padding: 14px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+.tabela-container th {
+  background: #f1f1f1;
+}
+
+.acoes {
+  white-space: nowrap;
+}
+
+.botao-editar {
+  background: #e8e8e8;
+  color: #333;
+  margin-right: 8px;
+}
+
+.botao-excluir {
+  background: #c0392b;
+  color: white;
+}
+
+.nenhum-leitor {
+  text-align: center !important;
+  padding: 30px !important;
+  color: #777;
+}
+```
