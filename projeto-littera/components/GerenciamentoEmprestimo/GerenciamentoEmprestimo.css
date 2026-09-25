@@ -1,26 +1,43 @@
-.gerenciamento-leitores {
+.gerenciamento-emprestimos {
   padding: 32px;
   width: 100%;
   box-sizing: border-box;
 }
 
-.cabecalho-leitores {
+.cabecalho-emprestimos {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 25px;
+  flex-wrap: wrap;
+  gap: 15px;
 }
 
-.cabecalho-leitores h1 {
+.cabecalho-emprestimos h1 {
   margin: 0 0 8px;
+  font-size: 24px;
 }
 
-.cabecalho-leitores p {
+.cabecalho-emprestimos p {
   margin: 0;
   color: #666;
 }
 
 .botao-novo {
+  border: none;
+  background: #2c3e50;
+  color: #f0efef;
+  padding: 12px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 15px;
+}
+
+.botao-novo:hover {
+  opacity: 0.9;
+}
+
+.botao-voltar{
   border: none;
   background: #2c3e50;
   color: white;
@@ -30,7 +47,7 @@
   font-size: 15px;
 }
 
-.botao-novo:hover {
+.botao-voltar:hover {
   opacity: 0.9;
 }
 
@@ -48,16 +65,19 @@
   font-size: 15px;
 }
 
-.formulario-leitor {
+.formulario-emprestimo {
   background: #f7f7f7;
   padding: 24px;
   border-radius: 8px;
   margin-bottom: 25px;
   max-width: 600px;
+  width: 100%;
 }
 
-.formulario-leitor h2 {
+.formulario-emprestimo h2 {
   margin-top: 0;
+  margin-bottom: 15px;
+  color: #333333;
 }
 
 .campo {
@@ -69,6 +89,7 @@
 .campo label {
   margin-bottom: 6px;
   font-weight: bold;
+  color: #333333;
 }
 
 .campo input {
@@ -76,6 +97,8 @@
   border: 1px solid #ccc;
   border-radius: 5px;
   font-size: 15px;
+  box-sizing: border-box;
+  width: 100%;
 }
 
 .acoes-formulario {
@@ -109,6 +132,7 @@
 
 .tabela-container table {
   width: 100%;
+  font-size: 17px;
   border-collapse: collapse;
   background: white;
 }
@@ -139,20 +163,10 @@
   color: white;
 }
 
-.nenhum-leitor {
+.nenhum-emprestimo {
   text-align: center !important;
   padding: 30px !important;
   color: #777;
-}
-
-.botao-voltar{
-  border: none;
-  background: #2c3e50;
-  color: white;
-  padding: 12px 20px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 15px;
 }
 
 /* Força a cor preta nas células e cabeçalhos da tabela de leitores */
