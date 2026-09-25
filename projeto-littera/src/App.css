@@ -1,0 +1,18 @@
+*{
+  margin: 0;
+  padding: 0;
+    font-family: Helvetica;
+    box-sizing: border-box;
+    text-shadow: 0px 0px 3px #000;
+    Font-family: Helvetica;
+}
+.App {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  min-height: 100vh;
+  background-image:url("../assets/bg-login.jpg");
+  background-size: cover;
+  background-position: center;
+}
