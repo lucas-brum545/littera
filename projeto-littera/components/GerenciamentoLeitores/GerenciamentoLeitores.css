@@ -1,3 +1,4 @@
+```css
 .gerenciamento-leitores {
   padding: 32px;
   width: 100%;
@@ -144,19 +145,4 @@
   padding: 30px !important;
   color: #777;
 }
-
-.botao-voltar{
-  border: none;
-  background: #2c3e50;
-  color: white;
-  padding: 12px 20px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 15px;
-}
-
-/* Força a cor preta nas células e cabeçalhos da tabela de leitores */
-.tabela-container th,
-.tabela-container td {
-  color: #333333; /* Preto suave / cinza escuro para leitura ideal */
-}
+```

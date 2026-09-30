@@ -1,4 +1,4 @@
-package com.littera.backend.model;
+package com.littera.backend.modelo;
 
 import java.time.LocalDate;
 

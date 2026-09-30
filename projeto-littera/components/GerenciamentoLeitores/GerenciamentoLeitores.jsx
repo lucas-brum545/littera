@@ -1,9 +1,7 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router'
 import './GerenciamentoLeitores.css'
 
 function GerenciamentoLeitores() {
-  const navigate = useNavigate();
   const [leitores, setLeitores] = useState([
     {
       id: 1,
@@ -122,10 +120,6 @@ function GerenciamentoLeitores() {
         <button className="botao-novo" onClick={abrirCadastro}>
           + Novo leitor
         </button>
-
-        <button type="button" className="botao-voltar" onClick={()=>navigate('/admin')}>
-              ⬅️ Voltar
-            </button>
       </div>
 
       <div className="barra-pesquisa">
