@@ -3,14 +3,14 @@
 }
 
 /* cabeçalho da pagina */
-.gerenciamento-usuarios {
-  width: 1090px;
+.gerenciamento-emprestimos {
+  width: 1000px;
   box-sizing: border-box;
   flex-direction: column;
   min-height: 100vh;
 }
 
-.cabecalho-usuarios {
+.cabecalho-emprestimos {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -18,31 +18,29 @@
   padding-bottom: 10px;
 }
 
-/* titulo e subtitulo da pagina */
-
-.cabecalho-usuarios h1 {
+.cabecalho-emprestimos h1 {
   font-size: 30px;
   margin: 0 0;
   padding-right: 10px;
-  width: 460px;
+  width: 380px;
+  padding-bottom: 20px;
 }
 
-.cabecalho-usuarios p {
-  padding-left: 10px;
+.cabecalho-emprestimos p {
   margin: auto;
-  color: #ffff;
-  font-weight: bold;
+  color: white;
   padding-left: 0 !important;
   margin-left: 0 !important;
   margin: 0 auto;
   padding-bottom: 5px;
-  width: 300px;
+  width: 400px;
   padding: 10px;
+  font-weight: bold;
 }
 
 .container-botoes{
   display: flex;
-  gap: 10px;
+  gap: 12px;
 }
 
 .botao-novo {
@@ -74,23 +72,24 @@
   font-size: 15px;
 }
 
-.formulario-usuario-wrapper {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 20px;
-}
-
-.formulario-usuario {
+.formulario-emprestimo {
   background: #f7f7f7;
   padding: 24px;
   border-radius: 8px;
   margin-bottom: 25px;
-  width: 600px;
+  max-width: 600px;
 }
 
-.formulario-usuario h2 {
+.formulario-emprestimo h2 {
+  color: #666;
   margin-top: 0;
   margin-bottom: 20px;
+}
+
+.formulario-emprestimo label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: bold;
   color: #666;
 }
 
@@ -132,8 +131,8 @@
 }
 
 .botao-cancelar {
-  background: #ddd;
-  color: #333;
+  background: #c0392b;
+  color: white;
 }
 
 .tabela-container {
@@ -174,7 +173,7 @@
   color: white;
 }
 
-.nenhum-usuario {
+.nenhum-emprestimo {
   text-align: center !important;
   padding: 30px !important;
   color: #777;
@@ -184,30 +183,20 @@
   border: none;
   background: #2c3e50;
   color: white;
+  padding: 12px;
   border-radius: 6px;
   cursor: pointer;
   font-size: 15px;
 }
 
-.botao-voltar:hover{
-  opacity: 0.7;
-}
-
-/* Força a cor preta nas células e cabeçalhos da tabela de usuarios */
-.tabela-container th,
+.tabela-container th
 .tabela-container td {
-  color: #333333; /* Preto suave / cinza escuro para leitura ideal */
+  color: #333333;
 }
 
 .icon{
-  color: #ffff !important;
-  padding-right: 0px;
+  color: #ffff;
+  padding-right: 10px;
   width: 35px;
   height: 35px;
-}
-
-.aviso-tela{
-  text-align: center;
-  font-size: 18px;
-  font-weight: bold;
 }

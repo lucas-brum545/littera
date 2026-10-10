@@ -89,33 +89,23 @@ body {
     line-height: 1.5;
 }
 
-.has-submenu:hover {
-    background-color: #334155;
-}
-
 .submenu {
+    height: 300px;
     max-height: 0;
     overflow: hidden;
     transition: max-height 0.3s ease-out;
-    & icon{
-        color: #334155;
-    }
 }
 
 .has-submenu:hover .submenu {
-    color: #334155;
-    max-height: 200px; 
+    max-height: 218px; 
 }
 
 .submenu li a {
-    padding-left: 35px;
     font-size: 17px;
-    color: #334155;
 }
 
 .submenu li a:hover {
     color: #ffffff;
-    background-color: #334155;
 }
 
 /* Botão Sair na parte inferior */
@@ -136,8 +126,8 @@ body {
 .admin-main-content {
   margin-left: 220px; /* Compensa a largura da sidebar fixa */
   flex: 1;
-  min-height: 100vh;
-  padding: 40px;
+  min-height: 130vh;
+  padding: 150px;
 }
 
 /* Container interno que empurra o rodapé para o fim da tela */
@@ -178,10 +168,8 @@ body {
 
 .icon{
     color:#334155;
-    margin-left: 10px;
-    padding-right: 10px;
-    width: 28px;
-    height: 28px;
+    height: 25px;
+    width: 25px;
 }
 
 .icon:hover{
@@ -192,8 +180,8 @@ body {
 .icon-logout{
     color: #7f1d1d;
     padding-right: 7px;
-    width: 28px;
-    height: 28px;
+    width: 20px;
+    height: 20px;
 }
 
 .icon-logout:hover{

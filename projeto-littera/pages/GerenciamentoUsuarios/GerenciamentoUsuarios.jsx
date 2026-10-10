@@ -4,49 +4,32 @@ import { useNavigate } from 'react-router'
 import { IoPeople } from "react-icons/io5";
 import { IoArrowBack } from "react-icons/io5";
 import { FaPlus } from "react-icons/fa";
-import './GerenciamentoAcervo.css'
-import {listarLivros} from '../../services/api'
-import {listarRevistas} from '../../services/api'
+import './GerenciamentoUsuarios.css'
+import {listarUsuarios} from '../../services/api'
 
-function GerenciamentoAcervo() {
+function GerenciamentoUsuarios() {
   const navigate = useNavigate();
-  // itens do acervo (livros e revistas) agora vao vir de uma api
-  const [livros, setLivros] = useState([])
-  const [revistas, setRevistas] = useState([])
+  // usuarios agora vao vir de uma api
+  const [usuarios, setUsuarios] = useState([])
   const [carregando, setCarregando] = useState(true)
   const [erro, setErro] = useState('')
-  // const usuariosFiltrados = usuarios.filter((usuario) =>
-  //   usuario.nome.toLowerCase().includes(pesquisa.toLowerCase())
-  // )
-
 
 
   useEffect(() => {
-    const fetchItensAcervo = async () => {
+    const fetchUsuarios = async () => {
       try {
-        const data = await listarLivros();
-        setLivros(data);
+        setCarregando(true);
+        const data = await listarUsuarios();
+        setUsuarios(data);
       } catch (error) {
-        console.error('Erro ao buscar livros:', error);
-        setErro('Erro ao buscar livros.');
+        console.error('Erro ao buscar usuários:', error);
+        setErro('Erro ao buscar usuários.');
+      } finally {
+        setCarregando(false);
       }
     };
 
-    fetchItensAcervo();
-  }, []);
-
-  useEffect(() => {
-    const fetchRevistas = async () => {
-      try {
-        const data = await listarRevistas();
-        setRevistas(data);
-      } catch (error) {
-        console.error('Erro ao buscar revistas:', error);
-        setErro('Erro ao buscar revistas.');
-      }
-    };
-
-    fetchRevistas();
+    fetchUsuarios();
   }, []);
 
   const [pesquisa, setPesquisa] = useState('')
@@ -59,6 +42,7 @@ function GerenciamentoAcervo() {
     telefone: '',
   })
 
+  if(carregando) return <p className='aviso-tela'>Carregando usuários...</p>
   if(erro) return <p className='aviso-tela'>{erro}</p>
 
 
@@ -83,19 +67,19 @@ function GerenciamentoAcervo() {
     setMostrarFormulario(true)
   }
 
-  function editarItemAcervo(itemAcervo) {
-    setEditando(itemAcervo.id)
+  function editarUsuario(usuario) {
+    setEditando(usuario.id)
 
     setFormulario({
-      nome: itemAcervo.nome,
-      email: itemAcervo.email,
-      telefone: itemAcervo.telefone,
+      nome: usuario.nome,
+      email: usuario.email,
+      telefone: usuario.telefone,
     })
 
     setMostrarFormulario(true)
   }
 
-  function salvarItemAcervo(e) {
+  function salvarUsuario(e) {
     e.preventDefault()
 
     if (!formulario.nome || !formulario.email || !formulario.telefone) {
@@ -140,13 +124,16 @@ function GerenciamentoAcervo() {
     }
   }
 
-  
+  const usuariosFiltrados = usuarios.filter((usuario) =>
+    usuario.nome.toLowerCase().includes(pesquisa.toLowerCase())
+  )
+
   return (
     <div className="content-wrap">
     <div className="gerenciamento-usuarios">
       <div className="cabecalho-usuarios">
-          <h1>Gerenciamento de Acervo <IoPeople className='icon'/></h1>
-          <p>Cadastre, pesquise, edite ou exclua itens do acervo.</p>
+          <h1>Gerenciamento de Usuários <IoPeople className='icon'/></h1>
+          <p>Cadastre, pesquise, edite ou exclua usuários.</p>
 
         <div className="container-botoes">
           <button className="botao-novo" onClick={abrirCadastro}>
@@ -162,7 +149,7 @@ function GerenciamentoAcervo() {
       <div className="barra-pesquisa">
         <input
           type="text"
-          placeholder="Pesquisar livro pelo nome"
+          placeholder="Pesquisar usuário pelo nome"
           value={pesquisa}
           onChange={(e) => setPesquisa(e.target.value)}
         />
@@ -220,83 +207,28 @@ function GerenciamentoAcervo() {
         </div>
       )}
 
-      <h1>Revistas</h1>
       <div className="tabela-container">
         <table>
           <thead>
             <tr>
-              <th>Código</th>
-              <th>Título</th>
-              <th>Ano</th>
-              <th>Disponível</th>
-              <th>Tipo</th>
-              <th>Edição</th>
-              <th>ISSN</th>
-              <th>Mes/Ano Publicação</th>
-              <th>Localização</th>
-              <th>Ações</th>
-            </tr>
-          </thead>
-          <tbody>
-            {revistas.map((revista) => (
-              <tr key={revista.codigo}>
-                <td>{revista.codigo}</td>
-                <td>{revista.titulo}</td>
-                <td>{revista.ano}</td>
-                <td>{revista.disponivel ? 'Sim' : 'Não'}</td>
-                <td>{revista.tipoItemAcervo}</td>
-                <td>{revista.edicao}</td>
-                <td>{revista.issn}</td>
-                <td>{revista.mesAnoPublicacao}</td>
-                <td>{revista.localizacao}</td>
-                <td className="acoes">
-                  <button
-                    className="botao-editar"
-                    onClick={() => editarUsuario(usuario)}
-                  >
-                    Editar
-                  </button>
-                  <button
-                    className="botao-excluir"
-                    onClick={() => excluirUsuario(usuario.id)}
-                  >
-                    Excluir
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      <h1>Livros</h1>
-      <br />
-
-      <div className="tabela-container">
-        <table>
-          <thead>
-            <tr>
-              <th>Código</th>
-              <th>Título</th>
-              <th>Autor</th>
-              <th>Ano</th>
-              <th>Disponível</th>
-              <th>Tipo</th>
-              <th>Localização</th>
+              <th>ID</th>
+              <th>Nome</th>
+              <th>E-mail</th>
+              <th>Telefone</th>
+              <th>Quantidade Emprestada</th>
               <th>Ações</th>
             </tr>
           </thead>
 
           <tbody>
-              {livros.map((livro) => (
-                <tr key={livro.codigo}>
-                  <td>{livro.codigo}</td>
-                  <td>{livro.titulo}</td>
-                  <td>{livro.autor}</td>
-                  <td>{livro.ano}</td>
-                  <td>{livro.disponivel ? 'Sim' : 'Não'}</td>
-                  <td>{livro.tipo}</td>
-                  <td>{livro.localizacao}</td>
+            {usuariosFiltrados.length > 0 ? (
+              usuarios.map((usuario) => (
+                <tr key={usuario.id}>
+                  <td>{usuario.id}</td>
+                  <td>{usuario.nome}</td>
+                  <td>{usuario.email}</td>
+                  <td>{usuario.telefone}</td>
+                  <td>{usuario.quantidadeEmprestada}</td>
                   <td className="acoes">
                     <button
                       className="botao-editar"
@@ -314,16 +246,19 @@ function GerenciamentoAcervo() {
                   </td>
                 </tr>
               ))
-            }
+            ) : (
+              <tr>
+                <td colSpan="6" className="nenhum-usuario">
+                  Nenhum usuário encontrado.
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
-      <br />
-      
-      <br />
     </div>
     </div>
   )
 }
 
-export default GerenciamentoAcervo
+export default GerenciamentoUsuarios

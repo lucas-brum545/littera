@@ -1,14 +1,15 @@
 import { useState } from "react"
-import './GerenciamentoEmprestimo.css'
+import './GerenciamentoReservas.css'
 import { useNavigate } from "react-router"
 import { PiHandArrowDownDuotone } from "react-icons/pi"; // icone emprestimos
 import { IoArrowBack } from "react-icons/io5";
 import { FaPlus } from "react-icons/fa";
 import dayjs from "dayjs"
 import { useEffect } from "react";
-import { listarEmprestimos } from "../../services/api";
+import { listarReservas } from "../../services/api";
+import { CiBookmarkCheck } from "react-icons/ci";
 
-export default function GerenciamentoEmprestimo(){
+export default function GerenciamentoReservas(){
     const [pesquisa, setPesquisa] = useState('')
     const [mostrarFormulario, setMostrarFormulario] = useState(false)
     const [editar, setEditar] = useState(null)
@@ -23,38 +24,10 @@ export default function GerenciamentoEmprestimo(){
         }
     )
     const navigate = useNavigate()
-    const [emprestimos, setEmprestimos] = useState([
-        {
-          id: 1,
-          nomeUsuario: 'Maria Silva',
-          emailUsuario: 'maria@email.com',
-          tipoItem: 'Revista',
-          itemTitulo: 'Super Interessante',
-          dataEmprestimo: "2026-09-24",
-          dataDevolucao: "2026-09-30" 
-        },
-        {
-          id: 2,
-          nomeUsuario: 'Maria Souza',
-          emailUsuario: 'mariasouza@email.com',
-          tipoItem: 'Livro',
-          itemTitulo: 'Quem é voce alasca?',
-          dataEmprestimo: "2026-09-24",
-          dataDevolucao: "2026-09-30"
-        },
-        {
-          id: 3,
-          nomeUsuario: 'Joao Rafael',
-          emailUsuario: 'joaorafa@email.com',
-          tipoItem: 'Livro',
-          itemTitulo: 'Maravilhas da matemática',
-          dataEmprestimo: "2026-09-21",
-          dataDevolucao: "2026-09-28"
-        }
-      ])
+    const [reservas, setReservas] = useState([])
     
-    const emprestimosFiltrados = emprestimos.filter((emprestimo) =>
-    emprestimo.nomeUsuario.toLowerCase().includes(pesquisa.toLowerCase())
+    const reservasFiltradas = reservas.filter((reserva) =>
+    reserva.nomeUsuario.toLowerCase().includes(pesquisa.toLowerCase())
     )
     
     
@@ -68,15 +41,15 @@ export default function GerenciamentoEmprestimo(){
     }
 
     useEffect(() => {
-      const fetchEmprestimos = async () => {
+      const fetchReservas = async () => {
         try {
-          const data = await listarEmprestimos();
-          setEmprestimos(data);
+          const data = await listarReservas();
+          setReservas(data);
         } catch (error) {
-          console.error('Erro ao buscar empréstimos:', error);
+          console.error('Erro ao buscar reservas:', error);
         }
       }
-      fetchEmprestimos()
+      fetchReservas()
       }, []);
 
 
@@ -95,22 +68,22 @@ export default function GerenciamentoEmprestimo(){
       setMostrarFormulario(true)
     }
 
-   function editarEmprestimo(emprestimo) {
-    setEditar(emprestimo.id)
+   function editarReserva(reserva) {
+    setEditar(reserva.id)
 
     setFormulario({
-      nomeUsuario: emprestimo.nomeUsuario,
-      emailUsuario: emprestimo.emailUsuario,
-      tipoItem: emprestimo.tipoItem,
-      itemTitulo: emprestimo.itemTitulo,
-      dataEmprestimo: emprestimo.dataEmprestimo,
-      dataDevolucao: emprestimo.dataDevolucao
+      nomeUsuario: reserva.nomeUsuario,
+      emailUsuario: reserva.emailUsuario,
+      tipoItem: reserva.tipoItem,
+      itemTitulo: reserva.itemTitulo,
+      dataEmprestimo: reserva.dataEmprestimo,
+      dataDevolucao: reserva.dataDevolucao
     })
 
     setMostrarFormulario(true)
   }
 
-  function salvarEmprestimo(e){
+  function salvarReserva(e){
     e.preventDefault()
 
     if (!formulario.nomeUsuario || !formulario.emailUsuario || !formulario.itemTitulo || !formulario.tipoItem || !formulario.dataDevolucao || !formulario.dataEmprestimo) {
@@ -119,20 +92,20 @@ export default function GerenciamentoEmprestimo(){
     }
 
     if (editar !== null) {
-      setEmprestimos(
-        emprestimos.map((emp) =>
-          emp.id === editar
-            ? { ...emp, ...formulario }
-            : emp
+      setReservas(
+        reservas.map((res) =>
+          res.id === editar
+            ? { ...res, ...formulario }
+            : res
         )
       )
     } else {
-      const novoEmprestimo = {
+      const novaReserva = {
         id: Date.now(),
         ...formulario,
       }
 
-      setEmprestimos([...emprestimos, novoEmprestimo])
+      setReservas([...reservas, novaReserva])
     }
 
     setFormulario({
@@ -148,11 +121,11 @@ export default function GerenciamentoEmprestimo(){
     setMostrarFormulario(false)
   }
 
-  function excluirEmprestimo(id){
-    const confirmar = window.confirm('Deseja excluir este empréstimo?')
+  function excluirReserva(id){
+    const confirmar = window.confirm('Deseja excluir esta reserva?')
 
     if(confirmar){
-      setEmprestimos(emprestimos.filter((emprestimo) => emprestimo.id !== id))
+      setReservas(reservas.filter((reserva) => reserva.id !== id))
     }
   }
 
@@ -161,8 +134,8 @@ export default function GerenciamentoEmprestimo(){
         <div className="gerenciamento-emprestimos">
           {/* Cabeçalho alinhado com Flexbox */}
           <div className="cabecalho-emprestimos">
-            <h1>Gerenciamento de Empréstimos <PiHandArrowDownDuotone className="icon"/></h1>
-            <p>Cadastre, pesquise, edite ou exclua empréstimos.</p>
+            <h1>Gerenciamento de Reservas <CiBookmarkCheck className="icon"/></h1>
+            <p>Cadastre, pesquise, edite ou exclua reservas.</p>
 
             <div className="container-botoes">
               <button type="button" className="botao-novo" onClick={abrirCadastro}>
@@ -273,32 +246,32 @@ export default function GerenciamentoEmprestimo(){
                   <th>Código</th>
                   <th>Nome usuário</th>
                   <th>Título do item</th>
-                  <th>Data de Empréstimo</th>
-                  <th>Data de Devolução</th>
+                  <th>Data de Reserva</th>
+                  <th>Status</th>
                   <th>Ações</th>
                 </tr>
               </thead>
 
               <tbody>
-                {emprestimosFiltrados.length > 0 ? (
-                  emprestimosFiltrados.map((emp) => (
-                    <tr key={emp.codigo}>
-                      <td>{emp.codigo}</td>
-                      <td>{emp.nomeUsuario}</td>
-                      <td>{emp.tituloItem}</td>
-                      <td>{dayjs(emp.dataEmprestimo).format("DD/MM/YYYY")}</td>
-                      <td>{dayjs(emp.dataDevolucao).format("DD/MM/YYYY")}</td>
+                {reservasFiltradas.length > 0 ? (
+                  reservasFiltradas.map((res) => (
+                    <tr key={res.id}>
+                      <td>{res.id}</td>
+                      <td>{res.nomeUsuario}</td>
+                      <td>{res.tituloItem}</td>
+                      <td>{dayjs(res.dataReserva).format("DD/MM/YYYY")}</td>
+                      <td>{res.status}</td>
                       <td className="acoes">
                         <button
                           className="botao-editar"
-                          onClick={() => editarEmprestimo(emp)}
+                          onClick={() => editarReserva(res)}
                         >
                           Editar
                         </button>
 
                         <button
                           className="botao-excluir"
-                          onClick={() => excluirEmprestimo(emp.id)}
+                          onClick={() => excluirReserva(res.id)}
                         >
                           Excluir
                         </button>
