@@ -1,8 +1,26 @@
 import axios from 'axios';
 
-const api = axios.create({
+export const api = axios.create({
     baseURL: import.meta.env.VITE_API_URL ?? 'http://localhost:8080/'
 });
+
+api.interceptors.request.use((config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+});
+
+export async function realizarLogin(email, senha) {
+    try {
+        const { data } = await api.post('api/auth/login', { email, senha });
+        return data;
+    } catch (error) {
+        console.error('Erro ao realizar login:', error);
+        throw error;
+    }
+}
 
 export async function listarUsuarios() {
     try {
@@ -63,3 +81,5 @@ export async function buscarUsuario(id) {
         throw error;
     }
 }
+
+export default api;

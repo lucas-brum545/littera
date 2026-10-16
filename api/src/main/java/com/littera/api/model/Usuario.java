@@ -1,11 +1,18 @@
 package com.littera.api.model;
+
 import com.littera.api.dto.UsuarioResumo;
 import jakarta.persistence.*;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
 import java.time.LocalDate;
+import java.util.Collection;
+import java.util.List;
 
 @Entity
 @Table(name = "usuario")
-public class Usuario {
+public class Usuario implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,9 +39,6 @@ public class Usuario {
 
     @Column(name = "quantidade_emprestada", nullable = false)
     private Integer quantidadeEmprestada = 0;
-
-    // Construtores, Getters e Setters
-
 
     public Long getId() {
         return id;
@@ -98,5 +102,46 @@ public class Usuario {
 
     public void setQuantidadeEmprestada(Integer quantidadeEmprestada) {
         this.quantidadeEmprestada = quantidadeEmprestada;
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        if (this.tipoUsuario == TipoUsuario.ADMIN) {
+            return List.of(
+                new SimpleGrantedAuthority("ROLE_ADMIN"),
+                new SimpleGrantedAuthority("ROLE_LEITOR")
+            );
+        }
+        return List.of(new SimpleGrantedAuthority("ROLE_LEITOR"));
+    }
+
+    @Override
+    public String getPassword() {
+        return this.senhaHash;
+    }
+
+    @Override
+    public String getUsername() {
+        return this.email;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
     }
 }

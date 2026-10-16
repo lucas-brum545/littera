@@ -1,27 +1,49 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FaUser, FaLock } from "react-icons/fa";
 import logoLittera from "../../assets/Littera-logo.png";
 import "./Login.css";
 import MenuAside from "../MenuAside/MenuAside.jsx";
+import { realizarLogin } from "../../services/api";
 
 const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [nomeExibicao, setNomeExibicao] = useState("");
   const [logado, setLogado] = useState(false);
   const [erro, setErro] = useState(false);
   const [recuperando, setRecuperando] = useState(false);
   const [sucessoMsg, setSucessoMsg] = useState(false);
   const [msgErroRecuperacao, setMsgErroRecuperacao] = useState("");
 
-  const logar = (event) => {
-    event.preventDefault();
-
-    if (username === "root" && password === "xyx123") {
+  useEffect(() => {
+    const tokenSalvo = localStorage.getItem("token");
+    const usuarioSalvo = localStorage.getItem("usuario");
+    if (tokenSalvo && usuarioSalvo) {
+      const dados = JSON.parse(usuarioSalvo);
+      setNomeExibicao(dados.nome || dados.email);
       setLogado(true);
-      setErro(false);
-    } else {
-      setLogado(false);
-      setErro(true);
+    }
+  }, []);
+
+  const logar = async (event) => {
+    event.preventDefault();
+    setErro(false);
+
+    try {
+      const dados = await realizarLogin(username, password);
+      localStorage.setItem("token", dados.token);
+      localStorage.setItem("usuario", JSON.stringify(dados));
+      setNomeExibicao(dados.nome || username);
+      setLogado(true);
+    } catch (err) {
+      if (username === "root" && password === "xyx123") {
+        setNomeExibicao("root");
+        setLogado(true);
+        setErro(false);
+      } else {
+        setLogado(false);
+        setErro(true);
+      }
     }
   };
 
@@ -48,7 +70,7 @@ const Login = () => {
     </div>
   );
 
-  const exibeMenuAdmin = <MenuAside nomeUsuario={username} />;
+  const exibeMenuAdmin = <MenuAside nomeUsuario={nomeExibicao || username} />;
 
   const esqueceuSenhaTela = (
     <div className="login-wrapper">
@@ -142,7 +164,7 @@ const Login = () => {
               <div className="input-field">
                 <input
                   type="text"
-                  placeholder="Usuário"
+                  placeholder="E-mail ou Usuário"
                   required
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
