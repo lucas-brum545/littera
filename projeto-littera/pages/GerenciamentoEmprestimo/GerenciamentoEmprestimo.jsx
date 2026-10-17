@@ -1,88 +1,47 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import './GerenciamentoEmprestimo.css'
 import { useNavigate } from "react-router"
-import { PiHandArrowDownDuotone } from "react-icons/pi"; // icone emprestimos
+import { PiHandArrowDownDuotone } from "react-icons/pi";
 import { IoArrowBack } from "react-icons/io5";
 import { FaPlus } from "react-icons/fa";
 import dayjs from "dayjs"
-import { useEffect } from "react";
-import { listarEmprestimos } from "../../services/api";
+import { atualizarEmprestimo, criarEmprestimo, excluirEmprestimoApi, listarEmprestimos } from "../../services/api";
+import DialogEmprestimos from "../../components/DialogEmprestimos/DialogEmprestimos";
 
 export default function GerenciamentoEmprestimo(){
     const [pesquisa, setPesquisa] = useState('')
     const [mostrarFormulario, setMostrarFormulario] = useState(false)
     const [editar, setEditar] = useState(null)
-    const [formulario, setFormulario] = useState(
-        {
-          nomeUsuario: '',
-          emailUsuario: '',
-          tipoItem: '',
-          itemTitulo: '',
-          dataEmprestimo: "",
-          dataDevolucao: ""
-        }
-    )
+    const [formulario, setFormulario] = useState([])
+    const [emprestimos, setEmprestimos] = useState([])
+    const [exibirDialog, setExibirDialog] = useState(false)
+    const [emprestimoParaEditar, setEmprestimoParaEditar] = useState(null)
     const navigate = useNavigate()
-    const [emprestimos, setEmprestimos] = useState([
-        {
-          id: 1,
-          nomeUsuario: 'Maria Silva',
-          emailUsuario: 'maria@email.com',
-          tipoItem: 'Revista',
-          itemTitulo: 'Super Interessante',
-          dataEmprestimo: "2026-09-24",
-          dataDevolucao: "2026-09-30" 
-        },
-        {
-          id: 2,
-          nomeUsuario: 'Maria Souza',
-          emailUsuario: 'mariasouza@email.com',
-          tipoItem: 'Livro',
-          itemTitulo: 'Quem é voce alasca?',
-          dataEmprestimo: "2026-09-24",
-          dataDevolucao: "2026-09-30"
-        },
-        {
-          id: 3,
-          nomeUsuario: 'Joao Rafael',
-          emailUsuario: 'joaorafa@email.com',
-          tipoItem: 'Livro',
-          itemTitulo: 'Maravilhas da matemática',
-          dataEmprestimo: "2026-09-21",
-          dataDevolucao: "2026-09-28"
-        }
-      ])
     
-    const emprestimosFiltrados = emprestimos.filter((emprestimo) =>
-    emprestimo.nomeUsuario.toLowerCase().includes(pesquisa.toLowerCase())
-    )
-    
-    
+    // Função declarada no escopo principal para poder ser reutilizada
+    const fetchEmprestimos = async () => {
+      try {
+        const data = await listarEmprestimos();
+        setEmprestimos(data);
+      } catch (error) {
+        console.error('Erro ao buscar empréstimos:', error);
+      }
+    };
+
+    useEffect(() => {
+      fetchEmprestimos();
+    }, []);
+
     function handleChange(e) {
       const { name, value } = e.target
-
       setFormulario({
         ...formulario,
         [name]: value,
       })
     }
 
-    useEffect(() => {
-      const fetchEmprestimos = async () => {
-        try {
-          const data = await listarEmprestimos();
-          setEmprestimos(data);
-        } catch (error) {
-          console.error('Erro ao buscar empréstimos:', error);
-        }
-      }
-      fetchEmprestimos()
-      }, []);
-
-
     function abrirCadastro() {
       setEditar(null)
-
       setFormulario({
           nomeUsuario: '',
           emailUsuario: '',
@@ -91,81 +50,73 @@ export default function GerenciamentoEmprestimo(){
           dataEmprestimo: "",
           dataDevolucao: "" 
       })
-
       setMostrarFormulario(true)
     }
-
-   function editarEmprestimo(emprestimo) {
-    setEditar(emprestimo.id)
-
-    setFormulario({
-      nomeUsuario: emprestimo.nomeUsuario,
-      emailUsuario: emprestimo.emailUsuario,
-      tipoItem: emprestimo.tipoItem,
-      itemTitulo: emprestimo.itemTitulo,
-      dataEmprestimo: emprestimo.dataEmprestimo,
-      dataDevolucao: emprestimo.dataDevolucao
-    })
-
-    setMostrarFormulario(true)
-  }
-
-  function salvarEmprestimo(e){
-    e.preventDefault()
-
-    if (!formulario.nomeUsuario || !formulario.emailUsuario || !formulario.itemTitulo || !formulario.tipoItem || !formulario.dataDevolucao || !formulario.dataEmprestimo) {
-      alert('Preencha todos os campos.')
-      return
+   
+    async function abrirEdicao(emprestimo){
+      setEmprestimoParaEditar(emprestimo)
+      setExibirDialog(true)
     }
 
-    if (editar !== null) {
-      setEmprestimos(
-        emprestimos.map((emp) =>
-          emp.id === editar
-            ? { ...emp, ...formulario }
-            : emp
-        )
-      )
-    } else {
-      const novoEmprestimo = {
-        id: Date.now(),
-        ...formulario,
+    async function salvarEmprestimo(dadosDoFormulario){
+       try {
+            if (emprestimoParaEditar) {
+              await atualizarEmprestimo(emprestimoParaEditar.codigo, dadosDoFormulario)
+            } else {
+              await criarEmprestimo(dadosDoFormulario)
+            }
+      
+            await fetchEmprestimos() // Agora funciona perfeitamente!
+            setExibirDialog(false)
+            setEmprestimoParaEditar(null)
+            alert('Empréstimo salvo com sucesso!')
+          }
+       catch (error) {
+          console.error('Erro ao salvar empréstimo:', error)
+          alert('Erro ao salvar empréstimo na base de dados.')
+        }
+
+      setEditar(null)
+      setMostrarFormulario(false)
+    }
+
+    async function excluirEmprestimo(codigo){
+      const confirmar = window.confirm('Deseja excluir este empréstimo?')
+
+      if(confirmar){
+        try{
+          await excluirEmprestimoApi(codigo)
+          setEmprestimos(emprestimos.filter((emprestimo) => emprestimo.codigo !== codigo))
+          alert('Empréstimo excluído com sucesso')
+          await fetchEmprestimos()
+        }
+        catch(error){
+          console.error('Erro ao excluir o empréstimo: ', error)
+          alert('Não foi possível excluir o empréstimo')
+        }
       }
-
-      setEmprestimos([...emprestimos, novoEmprestimo])
     }
-
-    setFormulario({
-      nomeUsuario: '',
-      emailUsuario: '',
-      tipoItem: '',
-      itemTitulo: '',
-      dataEmprestimo: "",
-      dataDevolucao: "" 
-    })
-
-    setEditar(null)
-    setMostrarFormulario(false)
-  }
-
-  function excluirEmprestimo(id){
-    const confirmar = window.confirm('Deseja excluir este empréstimo?')
-
-    if(confirmar){
-      setEmprestimos(emprestimos.filter((emprestimo) => emprestimo.id !== id))
-    }
-  }
 
     return(<>
       <div className="content-wrap">
         <div className="gerenciamento-emprestimos">
-          {/* Cabeçalho alinhado com Flexbox */}
           <div className="cabecalho-emprestimos">
             <h1>Gerenciamento de Empréstimos <PiHandArrowDownDuotone className="icon"/></h1>
             <p>Cadastre, pesquise, edite ou exclua empréstimos.</p>
+            
+            {exibirDialog &&
+              <DialogEmprestimos
+                emprestimoParaEditar={emprestimoParaEditar}
+                onCancelar={() => setExibirDialog(false)}
+                onSalvar={salvarEmprestimo} 
+              />
+            }
 
             <div className="container-botoes">
-              <button type="button" className="botao-novo" onClick={abrirCadastro}>
+              <button className="botao-novo" onClick={() => {
+                setEmprestimoParaEditar(null)
+                setExibirDialog(true)
+              }}>
                 <FaPlus/>
               </button>
                 
@@ -184,88 +135,6 @@ export default function GerenciamentoEmprestimo(){
             />
           </div>
 
-          {mostrarFormulario && (
-            <form className="formulario-emprestimo" onSubmit={salvarEmprestimo}>
-              <h2>
-                {editar !== null ? 'Editar empréstimo' : 'Novo empréstimo'}
-              </h2>
-
-              <div className="campo">
-                <input
-                  type="text"
-                  name="nomeUsuario"
-                  value={formulario.nomeUsuario}
-                  onChange={handleChange}
-                  placeholder="Digite o nome"
-                />
-              </div>
-
-              <div className="campo">
-                <input
-                  type="email"
-                  name="emailUsuario"
-                  value={formulario.emailUsuario}
-                  onChange={handleChange}
-                  placeholder="Digite o e-mail"
-                />
-              </div>
-
-              <div className="campo">
-                <input
-                  type="text"
-                  name="tipoItem"
-                  value={formulario.tipoItem}
-                  onChange={handleChange}
-                  placeholder="Livro ou Revista"
-                />
-              </div>
-
-              <div className="campo">
-                <input
-                  type="text"
-                  name="itemTitulo"
-                  value={formulario.itemTitulo}
-                  onChange={handleChange}
-                  placeholder="Digite o título"
-                />
-              </div>
-
-              <div className="campo">
-                <label>Data de Empréstimo</label>
-                <input
-                  type="date"
-                  name="dataEmprestimo"
-                  value={formulario.dataEmprestimo}
-                  onChange={handleChange}
-                />
-              </div>
-
-              <div className="campo">
-                <label>Data de Devolução</label>
-                <input
-                  type="date"
-                  name="dataDevolucao"
-                  value={formulario.dataDevolucao}
-                  onChange={handleChange}
-                />
-              </div>
-
-              <div className="acoes-formulario">
-                <button
-                  type="button"
-                  className="botao-cancelar"
-                  onClick={() => setMostrarFormulario(false)}
-                >
-                  Cancelar
-                </button>
-
-                <button type="submit" className="botao-salvar">
-                  Salvar
-                </button>
-              </div>
-            </form>
-          )}
-
           <div className="tabela-container">
             <table>
               <thead>
@@ -280,37 +149,32 @@ export default function GerenciamentoEmprestimo(){
               </thead>
 
               <tbody>
-                {emprestimosFiltrados.length > 0 ? (
-                  emprestimosFiltrados.map((emp) => (
+                {emprestimos.length === 0 ? (
+                  <tr>
+                    <td colSpan="6">Nenhum empréstimo encontrado.</td>
+                  </tr>
+                ) : (
+                  emprestimos.map((emp) => (
                     <tr key={emp.codigo}>
                       <td>{emp.codigo}</td>
                       <td>{emp.nomeUsuario}</td>
-                      <td>{emp.tituloItem}</td>
-                      <td>{dayjs(emp.dataEmprestimo).format("DD/MM/YYYY")}</td>
-                      <td>{dayjs(emp.dataDevolucao).format("DD/MM/YYYY")}</td>
+                      <td>{emp.tituloItemAcervo}</td>
+                      <td>{emp.dataEmprestimo ? dayjs(emp.dataEmprestimo).format("DD/MM/YYYY") : ''}</td>
+                      <td>{emp.dataDevolucao ? dayjs(emp.dataDevolucao).format("DD/MM/YYYY") : ''}</td>
                       <td className="acoes">
-                        <button
-                          className="botao-editar"
-                          onClick={() => editarEmprestimo(emp)}
-                        >
+                        <button className="botao-editar" onClick={() => abrirEdicao(emp)}>
                           Editar
                         </button>
 
                         <button
                           className="botao-excluir"
-                          onClick={() => excluirEmprestimo(emp.id)}
+                          onClick={() => excluirEmprestimo(emp.codigo)}
                         >
                           Excluir
                         </button>
                       </td>
                     </tr>
                   ))
-                ) : (
-                  <tr>
-                    <td colSpan="7" className="nenhum-emprestimo">
-                      Nenhum empréstimo encontrado.
-                    </td>
-                  </tr>
                 )}
               </tbody>
             </table>

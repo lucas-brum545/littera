@@ -67,16 +67,16 @@ export default function MenuAside(props) {
                 <nav className="sidebar-nav">
                     <ul>
                         <li className="has-submenu">
-                            <Link to="/admin"><AssignmentIcon style={{height:'25px', width:'25px', paddingRight:'7px'}}/>Gerenciamento</Link>
+                            <Link to="/admin"><AssignmentIcon className='icon-panel'/>Gerenciamento</Link>
                             <ul className="submenu">
-                                <li><Link to="/admin/usuarios"><IoPeople style={{height:'25px', width:'25px', paddingRight:'7px'}}/>Usuários</Link></li>
-                                <li><Link to="/admin/acervo"><ImBooks style={{height:'25px', width:'25px', paddingRight:'7px'}}/>Acervo</Link></li>
-                                <li><Link to="/admin/emprestimos"><PiHandArrowDownDuotone style={{height:'25px', width:'25px', paddingRight:'7px'}}/>Empréstimos</Link></li>
-                                <li><Link to="/admin/reservas"><CiBookmarkCheck style={{height:'25px', width:'25px', paddingRight:'7px'}}/>Reservas</Link></li>
+                                <li><Link to="/admin/usuarios"><IoPeople className='icon-panel'/>Usuários</Link></li>
+                                <li><Link to="/admin/acervo"><ImBooks className='icon-panel'/>Acervo</Link></li>
+                                <li><Link to="/admin/emprestimos"><PiHandArrowDownDuotone className='icon-panel'/>Empréstimos</Link></li>
+                                <li><Link to="/admin/reservas"><CiBookmarkCheck className='icon-panel'/>Reservas</Link></li>
                             </ul>
                         </li>
                         <li className="logout">
-                            <Link to="/login"><LogoutIcon style={{height:'25px', width:'25px', paddingRight:'7px'}}/>Sair</Link>
+                            <Link to="/login"><LogoutIcon className='icon-logout'/>Sair</Link>
                         </li>
                     </ul>
                 </nav>

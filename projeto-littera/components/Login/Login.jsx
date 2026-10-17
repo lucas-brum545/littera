@@ -6,7 +6,7 @@ import MenuAside from "../MenuAside/MenuAside.jsx";
 import { realizarLogin } from "../../services/api";
 
 const Login = () => {
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [nomeExibicao, setNomeExibicao] = useState("");
   const [logado, setLogado] = useState(false);
@@ -14,6 +14,8 @@ const Login = () => {
   const [recuperando, setRecuperando] = useState(false);
   const [sucessoMsg, setSucessoMsg] = useState(false);
   const [msgErroRecuperacao, setMsgErroRecuperacao] = useState("");
+
+  // const { login } = useAuth()
 
   useEffect(() => {
     const tokenSalvo = localStorage.getItem("token");
@@ -30,13 +32,13 @@ const Login = () => {
     setErro(false);
 
     try {
-      const dados = await realizarLogin(username, password);
+      const dados = await realizarLogin(email, password);
       localStorage.setItem("token", dados.token);
-      localStorage.setItem("usuario", JSON.stringify(dados));
-      setNomeExibicao(dados.nome || username);
+      localStorage.setItem("email", JSON.stringify(dados));
+      setNomeExibicao(dados.nome || email);
       setLogado(true);
     } catch (err) {
-      if (username === "root" && password === "xyx123") {
+      if (email === "root" && password === "xyx123") {
         setNomeExibicao("root");
         setLogado(true);
         setErro(false);
@@ -50,7 +52,7 @@ const Login = () => {
   const handleRecuperarSenha = (event) => {
     event.preventDefault();
 
-    if (username === "root" && password.trim() !== "") {
+    if (email === "root" && password.trim() !== "") {
       setSucessoMsg(true);
       setMsgErroRecuperacao("");
       setTimeout(() => {
@@ -64,13 +66,23 @@ const Login = () => {
     }
   };
 
+  async function enviar(e){
+    e.preventDefault()   // impede o recarregamento padrão do <form>
+        try {
+            await login(email, senha)  // pode lançar erro se as credenciais falharem
+            navigate('/')        // deu certo → volta para a capa
+        } catch (erro) {
+            setAviso(erro.message)  // exibe a mensagem de erro na tela
+        }
+  }
+
   const mensagemErro = (
     <div style={{ color: "red" }}>
       <h3>Usuário ou senha incorretos!</h3>
     </div>
   );
 
-  const exibeMenuAdmin = <MenuAside nomeUsuario={nomeExibicao || username} />;
+  const exibeMenuAdmin = <MenuAside nomeUsuario={nomeExibicao || email} />;
 
   const esqueceuSenhaTela = (
     <div className="login-wrapper">
@@ -86,8 +98,8 @@ const Login = () => {
               type="text"
               placeholder="Usuário"
               required
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
             />
             <FaUser className="icon" />
           </div>
@@ -164,10 +176,10 @@ const Login = () => {
               <div className="input-field">
                 <input
                   type="text"
-                  placeholder="E-mail ou Usuário"
+                  placeholder="E-mail"
                   required
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                 />
                 <FaUser className="icon" />
               </div>

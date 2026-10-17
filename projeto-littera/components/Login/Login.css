@@ -4,6 +4,7 @@ body{
   font-family: 'Arial', sans-serif;
   background-color: #1e293b !important; /* Cor de fundo escura */
   color: #ffffff; /* Cor do texto clara */
+  letter-spacing: 0.75px;
 }
 
 .login-wrapper {

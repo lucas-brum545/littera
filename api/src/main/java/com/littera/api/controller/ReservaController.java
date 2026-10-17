@@ -1,7 +1,9 @@
 package com.littera.api.controller;
 
-import com.littera.api.dto.ReservaResumo;
+import com.littera.api.dto.ReservaRequest;
+import com.littera.api.dto.ReservaResponse;
 import com.littera.api.service.ReservaService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,15 +20,30 @@ public class ReservaController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ReservaResumo>> listarResumos() {
-        List<ReservaResumo> resumos = reservaService.listarTodas();
-        return ResponseEntity.ok(resumos);
+    public ResponseEntity<List<ReservaResponse>> listarTodas() {
+        return ResponseEntity.ok(reservaService.listarTodas());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ReservaResumo> buscarPorId(@PathVariable Long id) {
-        return reservaService.buscarPorIdResumo(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<ReservaResponse> buscarPorId(@PathVariable Long id) {
+        return ResponseEntity.ok(reservaService.buscarPorId(id));
+    }
+
+    @PostMapping
+    public ResponseEntity<ReservaResponse> criar(@RequestBody ReservaRequest request) {
+        ReservaResponse novaReserva = reservaService.salvar(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(novaReserva);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ReservaResponse> atualizar(@PathVariable Long id, @RequestBody ReservaRequest request) {
+        ReservaResponse reservaAtualizada = reservaService.atualizar(id, request);
+        return ResponseEntity.ok(reservaAtualizada);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deletar(@PathVariable Long id) {
+        reservaService.deletar(id);
+        return ResponseEntity.noContent().build();
     }
 }

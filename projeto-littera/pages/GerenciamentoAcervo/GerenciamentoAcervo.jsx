@@ -7,6 +7,7 @@ import { FaPlus } from "react-icons/fa";
 import './GerenciamentoAcervo.css'
 import {listarLivros} from '../../services/api'
 import {listarRevistas} from '../../services/api'
+import { ImBooks } from 'react-icons/im';
 
 function GerenciamentoAcervo() {
   const navigate = useNavigate();
@@ -145,7 +146,7 @@ function GerenciamentoAcervo() {
     <div className="content-wrap">
     <div className="gerenciamento-usuarios">
       <div className="cabecalho-usuarios">
-          <h1>Gerenciamento de Acervo <IoPeople className='icon'/></h1>
+          <h1>Gerenciamento de Acervo <ImBooks className='icon'/></h1>
           <p>Cadastre, pesquise, edite ou exclua itens do acervo.</p>
 
         <div className="container-botoes">
@@ -221,6 +222,7 @@ function GerenciamentoAcervo() {
       )}
 
       <h1>Revistas</h1>
+      <br />
       <div className="tabela-container">
         <table>
           <thead>

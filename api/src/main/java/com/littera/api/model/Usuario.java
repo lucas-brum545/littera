@@ -1,5 +1,6 @@
 package com.littera.api.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.littera.api.dto.UsuarioResumo;
 import jakarta.persistence.*;
 import org.springframework.security.core.GrantedAuthority;
@@ -27,6 +28,7 @@ public class Usuario implements UserDetails {
     @Column(nullable = false, length = 30)
     private String telefone;
 
+    @JsonFormat(pattern = "yyyy-MM-dd")
     @Column(name = "data_nascimento", nullable = false)
     private LocalDate dataNascimento;
 

@@ -2,6 +2,7 @@ package com.littera.api.controller;
 
 import com.littera.api.dto.LivroRequest;
 import com.littera.api.dto.LivroResponse;
+import com.littera.api.dto.RevistaResumo;
 import com.littera.api.service.AcervoService;
 import com.littera.api.service.RevistaService;
 import org.springframework.http.HttpStatus;
@@ -34,6 +35,18 @@ public class AcervoController {
     public ResponseEntity<Void> deletarItem(@PathVariable Long codigo) {
         acervoService.deletar(codigo);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/revistas")
+    public ResponseEntity<RevistaResumo> criarRevista(@RequestBody RevistaResumo dto) {
+        RevistaResumo novaRevista = acervoService.salvarRevista(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(novaRevista);
+    }
+
+    @PutMapping("/revistas/{codigo}")
+    public ResponseEntity<RevistaResumo> atualizarRevista(@PathVariable Long codigo, @RequestBody RevistaResumo dto) {
+        RevistaResumo revistaAtualizada = acervoService.atualizarRevista(codigo, dto);
+        return ResponseEntity.ok(revistaAtualizada);
     }
 }
 
