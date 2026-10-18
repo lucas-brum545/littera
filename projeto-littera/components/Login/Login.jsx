@@ -2,28 +2,37 @@ import { useState } from "react";
 import { FaUser, FaLock } from "react-icons/fa";
 import logoLittera from "../../assets/Littera-logo.png";
 import "./Login.css";
-import MenuAside from "../MenuAside/MenuAside.jsx";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../src/contexts/AuthContext";
 
 const Login = () => {
+  const { login } = useAuth();
+  const navigate = useNavigate();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [logado, setLogado] = useState(false);
   const [erro, setErro] = useState(false);
   const [recuperando, setRecuperando] = useState(false);
   const [sucessoMsg, setSucessoMsg] = useState(false);
   const [msgErroRecuperacao, setMsgErroRecuperacao] = useState("");
 
-  const logar = (event) => {
-    event.preventDefault();
+  
+const logar = (event) => {
+  event.preventDefault();
 
-    if (username === "root" && password === "xyx123") {
-      setLogado(true);
-      setErro(false);
-    } else {
-      setLogado(false);
-      setErro(true);
-    }
-  };
+  if (username === "root" && password === "xyx123") {
+    const dadosUsuario = {
+      username,
+      nome: username,
+    };
+
+    login(dadosUsuario);
+    setErro(false);
+    navigate("/admin");
+  } else {
+    setErro(true);
+  }
+};
+
 
   const handleRecuperarSenha = (event) => {
     event.preventDefault();
@@ -48,7 +57,6 @@ const Login = () => {
     </div>
   );
 
-  const exibeMenuAdmin = <MenuAside nomeUsuario={username} />;
 
   const esqueceuSenhaTela = (
     <div className="login-wrapper">
@@ -123,9 +131,7 @@ const Login = () => {
 
   return (
     <>
-      {logado ? (
-        exibeMenuAdmin
-      ) : recuperando ? (
+      {recuperando ? (
         <div>
           <img src={logoLittera} alt="Logotipo Littera" className="logo-img" />
           <br />
