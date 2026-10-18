@@ -2,20 +2,21 @@ import { useState, useEffect } from "react";
 import { FaUser, FaLock } from "react-icons/fa";
 import logoLittera from "../../assets/Littera-logo.png";
 import "./Login.css";
-import MenuAside from "../MenuAside/MenuAside.jsx";
-import { realizarLogin } from "../../services/api";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../src/context/AuthContext";
+import Alert from '@mui/material/Alert';
 
 const Login = () => {
+  const { login } = useAuth();
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [nomeExibicao, setNomeExibicao] = useState("");
-  const [logado, setLogado] = useState(false);
-  const [msgErro, setMsgErro] = useState("");
+  const [senha, setSenha] = useState("");
+  const [erro, setErro] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [recuperando, setRecuperando] = useState(false);
   const [sucessoMsg, setSucessoMsg] = useState(false);
   const [msgErroRecuperacao, setMsgErroRecuperacao] = useState("");
 
-  // Restaura a sessão ao recarregar a página
   useEffect(() => {
     const tokenSalvo = localStorage.getItem("token");
     const usuarioSalvo = localStorage.getItem("usuario");
@@ -23,8 +24,7 @@ const Login = () => {
       try {
         const dados = JSON.parse(usuarioSalvo);
         if (dados.tipoUsuario === "ADMIN") {
-          setNomeExibicao(dados.nome || dados.email);
-          setLogado(true);
+          navigate("/admin", { replace: true });
         } else {
           localStorage.removeItem("token");
           localStorage.removeItem("usuario");
@@ -34,61 +34,38 @@ const Login = () => {
         localStorage.removeItem("usuario");
       }
     }
-  }, []);
+  }, [navigate]);
 
   const logar = async (event) => {
     event.preventDefault();
-    setMsgErro("");
+    setLoading(true);
+    setErro(false);
 
     try {
-      const dados = await realizarLogin(email, password);
-      const { token, ...usuario } = dados;
+      // Chama diretamente a função login do AuthContext (que já gere o axios e o localStorage)
+      await login(email, senha);
+      
+      setErro(false);
+      navigate("/admin", { replace: true });
 
-      if (usuario.tipoUsuario !== "ADMIN") {
-        setLogado(false);
-        setMsgErro("Acesso restrito a administradores.");
-        return; // não salva token nem usuário
-      }
-
-      localStorage.setItem("token", token);
-      localStorage.setItem("usuario", JSON.stringify(usuario));
-
-      setNomeExibicao(usuario.nome || usuario.email);
-      setLogado(true);
-    } catch (err) {
-      if (email === "root" && password === "xyx123") {
-        localStorage.setItem(
-          "usuario",
-          JSON.stringify({ nome: "root", email: "root", tipoUsuario: "ADMIN" })
-        );
-        setNomeExibicao("root");
-        setLogado(true);
-      } else {
-        setLogado(false);
-        setMsgErro("E-mail ou senha inválidos.");
-      }
+    } catch (error) {
+      console.error("Erro ao tentar fazer login:", error);
+      setErro(true);
+    } finally {
+      setLoading(false);
     }
-  };
-
-  const sair = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("usuario");
-    setNomeExibicao("");
-    setEmail("");
-    setPassword("");
-    setLogado(false);
   };
 
   const handleRecuperarSenha = (event) => {
     event.preventDefault();
 
-    if (email === "root" && password.trim() !== "") {
+    if (email === "root" && senha.trim() !== "") {
       setSucessoMsg(true);
       setMsgErroRecuperacao("");
       setTimeout(() => {
         setRecuperando(false);
         setSucessoMsg(false);
-        setPassword("");
+        setSenha("");
       }, 1500);
     } else {
       setSucessoMsg(false);
@@ -119,8 +96,8 @@ const Login = () => {
               type="password"
               placeholder="Senha"
               required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              value={senha}
+              onChange={(e) => setSenha(e.target.value)}
             />
             <FaLock className="icon" />
           </div>
@@ -157,73 +134,71 @@ const Login = () => {
     </div>
   );
 
-  if (logado) {
-    return <MenuAside nomeUsuario={nomeExibicao} onSair={sair} />;
-  }
-
-  if (recuperando) {
-    return (
-      <div>
-        <img src={logoLittera} alt="Logotipo Littera" className="logo-img" />
-        <br />
-        {esqueceuSenhaTela}
-      </div>
-    );
-  }
-
   return (
-    <div className="login-wrapper">
-      <img src={logoLittera} alt="Logotipo Littera" className="logo-img" />
-      <br />
-      <div className="container">
-        <form onSubmit={logar}>
-          <h1>Acesse o sistema</h1>
+    <>
+      {recuperando ? (
+        <div>
+          <img src={logoLittera} alt="Logotipo Littera" className="logo-img" />
+          <br />
+          {esqueceuSenhaTela}
+        </div>
+      ) : (
+        <div className="login-wrapper">
+          <img src={logoLittera} alt="Logotipo Littera" className="logo-img" />
+          <br />
+          <div className="container">
+            <form onSubmit={logar}>
+              <h1>Acesse o sistema</h1>
 
-          <div className="input-field">
-            <input
-              type="text"
-              placeholder="E-mail"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-            <FaUser className="icon" />
+              <div className="input-field">
+                <input
+                  type="text"
+                  placeholder="E-mail"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+                <FaUser className="icon" />
+              </div>
+
+              <div className="input-field">
+                <input
+                  type="password"
+                  placeholder="Senha"
+                  required
+                  value={senha}
+                  onChange={(e) => setSenha(e.target.value)}
+                />
+                <FaLock className="icon" />
+              </div>
+
+              <div className="recall-forget">
+                <a
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setRecuperando(true);
+                    setErro(false);
+                  }}
+                >
+                  Esqueceu sua senha?
+                </a>
+              </div>
+
+              <button type="submit" disabled={loading}>
+                {loading ? "Entrando..." : "Login"}
+              </button>
+
+              {erro && (
+                <Alert variant="filled" severity="error">
+                  Usuário ou senha incorretos!
+                </Alert>
+              )}
+            </form>
           </div>
-
-          <div className="input-field">
-            <input
-              type="password"
-              placeholder="Senha"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-            <FaLock className="icon" />
-          </div>
-
-          <div className="recall-forget">
-            <a
-              href="#"
-              onClick={(e) => {
-                e.preventDefault();
-                setRecuperando(true);
-                setMsgErro("");
-              }}
-            >
-              Esqueceu sua senha?
-            </a>
-          </div>
-
-          <button type="submit">Login</button>
-
-          {msgErro && (
-            <div className="mensagem-erro">
-              <h3>{msgErro}</h3>
-            </div>
-          )}
-        </form>
-      </div>
-    </div>
+        </div>
+      )}
+    </>
   );
 };
 

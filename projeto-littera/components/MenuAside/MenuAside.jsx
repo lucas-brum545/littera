@@ -1,24 +1,24 @@
 import { useState, useEffect } from 'react';
-import Login from '../Login/Login.jsx';
 import { Routes, Route, Link, useNavigate } from 'react-router-dom';
 import { IoPeople } from "react-icons/io5"; // icone leitores
 import { ImBooks } from "react-icons/im"; // icone acervo
 import { PiHandArrowDownDuotone } from "react-icons/pi"; // icone emprestimos
 import { CiBookmarkCheck } from "react-icons/ci";
-import GerenciamentoUsuarios from '../../pages/GerenciamentoUsuarios/GerenciamentoUsuarios.jsx';
-import GerenciamentoAcervo from '../../pages/GerenciamentoAcervo/GerenciamentoAcervo.jsx';
-import GerenciamentoEmprestimo from '../../pages/GerenciamentoEmprestimo/GerenciamentoEmprestimo';
-import GerenciamentoReservas from '../../pages/GerenciamentoReservas/GerenciamentoReservas.jsx';
-import AssignmentIcon from '@mui/icons-material/Assignment';
-import LogoutIcon from '@mui/icons-material/Logout';
-import './MenuAside.css';
+import { useAuth } from "../../src/context/AuthContext.jsx";
+import GerenciamentoUsuarios from "../../pages/GerenciamentoUsuarios/GerenciamentoUsuarios.jsx";
+import GerenciamentoAcervo from "../../pages/GerenciamentoAcervo/GerenciamentoAcervo.jsx";
+import GerenciamentoEmprestimo from "../../pages/GerenciamentoEmprestimo/GerenciamentoEmprestimo";
+import GerenciamentoReservas from "../../pages/GerenciamentoReservas/GerenciamentoReservas.jsx";
+import AssignmentIcon from "@mui/icons-material/Assignment";
+import LogoutIcon from "@mui/icons-material/Logout";
+import "./MenuAside.css";
 
 export default function MenuAside(props) {
-    const [saiu, setSaiu] = useState(false);
     const [nomeUsuario, setNomeUsuario] = useState(props.nomeUsuario || "");
     const navigate = useNavigate();
+    const { logout } = useAuth();
 
-    // Hooks sempre ANTES de qualquer return condicional
+    // Sincroniza o nome do usuário logado via props ou localStorage
     useEffect(() => {
         if (props.nomeUsuario) {
             setNomeUsuario(props.nomeUsuario);
@@ -28,23 +28,19 @@ export default function MenuAside(props) {
         if (usuarioSalvo) {
             try {
                 const dados = JSON.parse(usuarioSalvo);
-                setNomeUsuario(dados.nome || dados.email || "");
+                setNomeUsuario(dados.nome || dados.email || "Administrador");
             } catch {
-                // JSON inválido: ignora
+                setNomeUsuario("Administrador");
             }
         }
     }, [props.nomeUsuario]);
 
+    // Função de saída integrada corretamente com o AuthContext e o Router
     function sair(e) {
         e.preventDefault();
-        setSaiu(true);
+        logout();
+        navigate("/login", { replace: true });
     }
-    // ... clicarGerUsuarios, clicarGerAcervo, clicarGerEmprestimos iguais
-
-    if (saiu) {
-        return <Login />;
-    }
-    // ... demais returns condicionais iguais
 
     return (
         <div className="admin-layout-container">
@@ -63,20 +59,14 @@ export default function MenuAside(props) {
                             </ul>
                         </li>
                         <li className="logout">
-                            <Link
-                                to="/login"
-                                onClick={() => {
-                                    localStorage.removeItem("token");
-                                    localStorage.removeItem("usuario");
-                                    props.onSair?.();
-                                }}
-                            >
+                            <Link to="/login" onClick={sair}>
                                 <LogoutIcon className='icon-logout' />Sair
                             </Link>
                         </li>
                     </ul>
                 </nav>
             </aside>
+
             {/* Área de Conteúdo ao lado do menu */}
             <main className="admin-main-content">
                 <Routes>
@@ -84,7 +74,7 @@ export default function MenuAside(props) {
                     <Route index element={
                         <>
                             <span className='cabecalho-sessao'>
-                                    Olá, {nomeUsuario ? nomeUsuario.toUpperCase() : "Carregando..."}!
+                                Olá, {nomeUsuario ? nomeUsuario.toUpperCase() : "ADMINISTRADOR"}!
                             </span>
                             <h1 className="admin-title">Painel Administrativo</h1>
                             <p className="admin-subtitle">Selecione uma opção ao lado para começar</p>

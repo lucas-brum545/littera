@@ -1,24 +1,26 @@
-import { createContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
 import api from '../../services/api';
 
-export const AuthContext = createContext({});
+const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  const [usuario, setUsuario] = useState(null);
+  const [usuario, setUsuario] = useState(() => {
+    const salvo = localStorage.getItem("usuario");
+    return salvo ? JSON.parse(salvo) : null;
+  });
   const [carregando, setCarregando] = useState(true);
 
   useEffect(() => {
-    const usuarioSalvo = localStorage.getItem('usuario');
     const tokenSalvo = localStorage.getItem('token');
-
-    if (usuarioSalvo && tokenSalvo) {
-      setUsuario(JSON.parse(usuarioSalvo));
+    if (tokenSalvo && usuario) {
+      // Se necessário, podes validar a sessão aqui
     }
     setCarregando(false);
-  }, []);
+  }, [usuario]);
 
-  async function login(email, senha) {
-    const response = await api.post('/auth/login', { email, senha });
+ async function login(email, senha) {
+    // Note que passamos { email, senha } para bater com o record LoginRequest(String email, String senha)
+    const response = await api.post('/api/auth/login', { email, senha });
     const { token, id, nome, tipoUsuario } = response.data;
     const dadosUsuario = { id, nome, email, tipoUsuario };
 
@@ -34,9 +36,20 @@ export function AuthProvider({ children }) {
     setUsuario(null);
   }
 
+  const autenticado = Boolean(usuario);
+
   return (
-    <AuthContext.Provider value={{ autenticado: !!usuario, usuario, login, logout, carregando }}>
+    <AuthContext.Provider value={{ autenticado, usuario, login, logout, carregando }}>
       {children}
     </AuthContext.Provider>
   );
+}
+
+// Hook personalizado para facilitar o uso nos componentes (herdado do AuthContext2)
+export function useAuth() {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error("useAuth deve ser usado dentro de um AuthProvider");
+  }
+  return context;
 }

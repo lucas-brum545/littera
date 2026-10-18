@@ -14,7 +14,7 @@ api.interceptors.request.use((config) => {
 
 export async function realizarLogin(email, senha) {
     try {
-        const { data } = await api.post('api/auth/login', { email, senha });
+        const { data } = await api.post('/api/auth/login', { email, senha });
         return data;
     } catch (error) {
         console.error('Erro ao realizar login:', error);

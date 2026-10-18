@@ -76,7 +76,7 @@ body{
 
 .container .recall-forget {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   font-size: 14.5px;
   margin: -15px 0 15px;
 }
