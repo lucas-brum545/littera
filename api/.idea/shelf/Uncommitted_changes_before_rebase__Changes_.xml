@@ -1,0 +1,179 @@
+<changelist name="Uncommitted_changes_before_rebase_[Changes]" date="1792631017287" recycled="false" toDelete="true">
+  <option name="PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_rebase_[Changes]/shelved.patch" />
+  <option name="DESCRIPTION" value="Uncommitted changes before rebase [Changes]" />
+  <binary>
+    <option name="BEFORE_PATH" value="build/classes/java/main/com/littera/api/service/EmprestimoService.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="build/classes/java/main/com/littera/api/dto/EmprestimoResponse.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="build/tmp/compileJava/previous-compilation-data.bin" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="build/classes/java/main/com/littera/api/dto/LivroResumo.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="build/classes/java/main/com/littera/api/exception/GlobalExceptionHandler.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="build/classes/java/main/com/littera/api/repository/RevistaRepository.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="build/classes/java/main/com/littera/api/service/LivroService.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="build/classes/java/main/com/littera/api/repository/ReservaRepository.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="build/classes/java/main/com/littera/api/security/UsuarioAutenticado.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="build/classes/java/main/com/littera/api/repository/UsuarioRepository.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="build/classes/java/main/com/littera/api/service/AuthService.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="build/classes/java/main/com/littera/api/service/AcervoService.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="build/classes/java/main/com/littera/api/config/SecurityFilter.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="build/classes/java/main/com/littera/api/controller/AuthController.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="build/classes/java/main/com/littera/api/controller/EmprestimoController.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="build/classes/java/main/com/littera/api/controller/AcervoController.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="build/classes/java/main/com/littera/api/model/Livro.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="build/classes/java/main/com/littera/api/repository/ItemAcervoRepository.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="build/classes/java/main/com/littera/api/dto/UsuarioResponse.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="build/classes/java/main/com/littera/api/dto/LivroResponse.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="build/classes/java/main/com/littera/api/dto/ReservaResumo.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="build/classes/java/main/com/littera/api/repository/LivroRepository.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="build/classes/java/main/com/littera/api/dto/RevistaResumo.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="build/classes/java/main/com/littera/api/dto/LivroRequest.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="build/classes/java/main/com/littera/api/dto/LoginResponse.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="build/classes/java/main/com/littera/api/dto/UsuarioRequest.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="build/classes/java/main/com/littera/api/dto/LoginRequest.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="build/classes/java/main/com/littera/api/dto/UsuarioCadastro.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="build/classes/java/main/com/littera/api/model/Emprestimo.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="build/classes/java/main/com/littera/api/service/RevistaService.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value=".gradle/buildOutputCleanup/outputFiles.bin" />
+    <option name="AFTER_PATH" value=".gradle/buildOutputCleanup/outputFiles.bin" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_rebase_[Changes]/outputFiles.bin" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="build/classes/java/main/com/littera/api/model/Revista.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="build/classes/java/main/com/littera/api/config/ConfiguracaoCors.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="build/classes/java/main/com/littera/api/model/Usuario.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="build/classes/java/main/com/littera/api/dto/EmprestimoResumo.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="build/classes/java/main/com/littera/api/ApiApplication.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="build/classes/java/main/com/littera/api/model/TipoUsuario.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="build/classes/java/main/com/littera/api/dto/UsuarioResumo.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="build/classes/java/main/com/littera/api/exception/RecursoNaoEncontradoException.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="build/classes/java/main/com/littera/api/service/TokenService.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="build/classes/java/main/com/littera/api/exception/AuthExceptionHandler.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="build/classes/java/main/com/littera/api/model/Reserva.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="build/classes/java/main/com/littera/api/service/ReservaService.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="build/classes/java/main/com/littera/api/service/UsuarioService.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="build/classes/java/main/com/littera/api/dto/ReservaRequest.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="build/classes/java/main/com/littera/api/controller/LivroController.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value=".gradle/buildOutputCleanup/buildOutputCleanup.lock" />
+    <option name="AFTER_PATH" value=".gradle/buildOutputCleanup/buildOutputCleanup.lock" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_rebase_[Changes]/buildOutputCleanup.lock" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="build/classes/java/main/com/littera/api/model/TipoItemAcervo.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="build/classes/java/main/com/littera/api/config/SecurityConfig.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="build/classes/java/main/com/littera/api/dto/EmprestimoRequest.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="build/classes/java/main/com/littera/api/repository/EmprestimoRepository.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="build/classes/java/main/com/littera/api/controller/ReservaController.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="build/classes/java/main/com/littera/api/dto/UsuarioEditado.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="build/classes/java/main/com/littera/api/dto/ReservaResponse.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="build/classes/java/main/com/littera/api/controller/UsuarioController.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="build/classes/java/main/com/littera/api/controller/RevistaController.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="build/classes/java/main/com/littera/api/model/ItemAcervo.class" />
+  </binary>
+</changelist>
