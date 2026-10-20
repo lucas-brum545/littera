@@ -1,7 +1,9 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router'
 import { IoPeople, IoArrowBack } from "react-icons/io5";
 import { FaPlus } from "react-icons/fa";
+import Alert from '@mui/material/Alert';
+import CheckIcon from '@mui/icons-material/Check';
 import dayjs from "dayjs"
 import './GerenciamentoUsuarios.css'
 import { listarUsuarios, criarUsuario, atualizarUsuario, excluirUsuarioApi } from '../../services/api'
@@ -15,8 +17,29 @@ function GerenciamentoUsuarios() {
   const [erro, setErro] = useState('')
   const [exibirDialog, setExibirDialog] = useState(false)
   const [usuarioParaEditar, setUsuarioParaEditar] = useState(null)
+  const [pesquisa, setPesquisa] = useState('')
+  const [feedback, setFeedback] = useState({ mensagem: '', tipo: '' })
+
+  const normalizar = (texto) =>
+    String(texto ?? '')
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '') // remove acentos
+
+  // dentro do componente:
+  const usuariosFiltrados = useMemo(() => {
+    const termo = normalizar(pesquisa.trim())
+    if (!termo) return usuarios
+
+    return usuarios.filter((u) =>
+      [u.id, u.nome, u.tipoUsuario].some((campo) =>
+        normalizar(campo).includes(termo)
+      )
+    )
+  }, [usuarios, pesquisa])
 
   const fetchUsuarios = async () => {
+    setErro('')
     try {
       setCarregando(true);
       const data = await listarUsuarios();
@@ -33,81 +56,68 @@ function GerenciamentoUsuarios() {
     fetchUsuarios();
   }, []);
 
-  const [pesquisa, setPesquisa] = useState('')
-  const [mostrarFormulario, setMostrarFormulario] = useState(false)
-  const [editando, setEditando] = useState(null)
-
-  const [formulario, setFormulario] = useState({
-    nome: '',
-    email: '',
-    telefone: '',
-    dataNascimento: '',
-    senha: '',
-  })
-
-  if (carregando) return <p className='aviso-tela'>Carregando usuários...</p>
+  if (carregando && usuarios.length === 0) return <p className='aviso-tela'>Carregando usuários...</p>
   if (erro) return <p className='aviso-tela'>{erro}</p>
-
-  function handleChange(e) {
-    const { name, value } = e.target
-    setFormulario({
-      ...formulario,
-      [name]: value,
-    })
-  }
 
   async function abrirEdicao(usuario) {
     setUsuarioParaEditar(usuario)
     setExibirDialog(true)
   }
 
-  async function salvarUsuario(e) {
-    // 1. Evita o recarregamento padrão da página e captura o evento
-    if (e && typeof e.preventDefault === 'function') {
-      e.preventDefault();
+  // funciona tanto para edicao quanto para adicao
+  async function salvarUsuario(dados) {
+  try {
+    if (usuarioParaEditar) {
+      await atualizarUsuario(usuarioParaEditar.id, dados);
+    } else {
+      await criarUsuario(dados);
     }
 
-    // 2. Certifique-se de que está a enviar o objeto com os dados do estado (formulario), 
-    // e nunca o objeto 'e' do evento!
-    try {
-      if (usuarioParaEditar) {
-        await atualizarUsuario(usuarioParaEditar.id, formulario);
-      } else {
-        await criarUsuario(formulario);
-      }
+    await fetchUsuarios();
+    setExibirDialog(false);
+    setUsuarioParaEditar(null);
+    setFeedback({ mensagem: 'Usuário salvo com sucesso!', tipo: 'success' })
 
-      await fetchUsuarios();
-      setExibirDialog(false);
-      setUsuarioParaEditar(null);
-      alert('Usuário salvo com sucesso!');
-    } catch (error) {
-      console.error('Detalhes do erro ao salvar usuário:', error);
-      alert('Erro ao salvar usuário na base de dados.');
-    }
+  } catch (error) {
+    console.error('Detalhes do erro ao salvar usuário:', error);
+    const mensagemErro = error.response?.data?.message || 'Erro ao salvar usuário.';
+    alert(mensagemErro)
   }
+}
+
+  setTimeout(() => {
+    setFeedback({ mensagem: '', tipo: '' });
+  }, 10000);
 
   async function excluirUsuario(id) {
-    const confirmar = window.confirm('Tem certeza que deseja excluir este usuário? ID: ', id)
+    const confirmar = window.confirm(`Tem certeza que deseja excluir este usuário? ID: ${id}`)
 
     if (confirmar) {
       try {
         await excluirUsuarioApi(id)
         setUsuarios(usuarios.filter((usuario) => usuario.id !== id))
-        alert('Usuário excluído com sucesso')
-        await fetchEmprestimos()
+        setFeedback({ mensagem: 'Usuário excluído com sucesso!', tipo: 'success' })
       } catch (error) {
         console.error('Erro ao excluir usuário:', error)
-        alert('Não foi possível excluir o usuário.')
+        const mensagemErro = error.response?.data?.message || 'Erro ao excluir usuário.';
+        setFeedback({ mensagem: mensagemErro, tipo: 'error' })
       }
     }
   }
 
-  const usuariosFiltrados = usuarios.filter((usuario) =>
-    usuario.nome.toLowerCase().includes(pesquisa.toLowerCase())
-  )
-
   return (
     <div className="content-wrap">
+      {feedback.mensagem && (
+        <div style={{ marginBottom: '20px' }}>
+          <Alert
+            variant='filled'
+            severity={feedback.tipo}
+            icon={feedback.tipo === 'success' ? <CheckIcon fontSize="inherit" /> : undefined}
+          >
+            {feedback.mensagem}
+          </Alert>
+        </div>
+      )}
       <div className="gerenciamento-usuarios">
         <div className="cabecalho-usuarios">
           <h1>Gerenciamento de Usuários <IoPeople className='icon'/></h1>
@@ -137,7 +147,7 @@ function GerenciamentoUsuarios() {
         <div className="barra-pesquisa">
           <input
             type="text"
-            placeholder="Pesquisar usuário pelo nome"
+            placeholder="Pesquisar usuário pelo nome ou tipo de usuário"
             value={pesquisa}
             onChange={(e) => setPesquisa(e.target.value)}
           />
@@ -154,6 +164,8 @@ function GerenciamentoUsuarios() {
                 <th>Data de Nascimento</th>
                 <th>Tipo de Usuário</th>
                 <th>Quantidade Emprestada</th>
+                <th>Bloqueado para Empréstimo</th>
+                <th>Data Fim Bloqueio</th>
                 <th>Ações</th>
               </tr>
             </thead>
@@ -168,6 +180,10 @@ function GerenciamentoUsuarios() {
                     <td>{usuario.dataNascimento ? dayjs(usuario.dataNascimento).format('DD/MM/YYYY') : '-'}</td>
                     <td>{usuario.tipoUsuario}</td>
                     <td>{usuario.quantidadeEmprestada}</td>
+                    <td>{usuario.bloqueado ? 'SIM' : 'NÃO'}</td>
+                    <td>{usuario?.dataFimBloqueio 
+      ? dayjs(usuario.dataFimBloqueio).format('DD/MM/YYYY') 
+      : '-'}</td>
                     <td className="acoes">
                       <button className="botao-editar" onClick={() => abrirEdicao(usuario)}>
                         Editar

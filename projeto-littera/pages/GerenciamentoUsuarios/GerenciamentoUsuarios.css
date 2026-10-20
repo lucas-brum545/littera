@@ -21,10 +21,8 @@
 /* titulo e subtitulo da pagina */
 
 .cabecalho-usuarios h1 {
-  font-size: 30px;
-  margin: 0 0;
-  padding-right: 10px;
-  width: 460px;
+  width: 500px;
+  font-size: 30px !important;
 }
 
 .cabecalho-usuarios p {
@@ -36,8 +34,8 @@
   margin-left: 0 !important;
   margin: 0 auto;
   padding-bottom: 5px;
-  width: 300px;
-  padding: 10px;
+  width: 400px;
+  padding-top: 0%;
 }
 
 .container-botoes{
@@ -202,8 +200,8 @@
 .icon{
   color: #ffff !important;
   padding-right: 0px;
-  width: 35px;
-  height: 35px;
+  width: 70px;
+  height: 70px;
 }
 
 .aviso-tela{

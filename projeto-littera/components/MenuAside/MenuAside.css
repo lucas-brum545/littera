@@ -100,12 +100,33 @@ body {
     max-height: 218px; 
 }
 
+/* Submenu */
+.has-submenu > a::after {
+    font-size: 0.7rem;
+    float: right;
+    line-height: 1.5;
+}
+
+.submenu {
+    height: 300px;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
+}
+
+.has-submenu:hover .submenu {
+    max-height: 218px; 
+}
+
+/* --- ALTERAÇÕES AQUI --- */
 .submenu li a {
-    font-size: 17px;
+    font-size: 16px;
+    padding-left: 38px; /* Adiciona o recuo para mover o texto mais para a direita */
 }
 
 .submenu li a:hover {
     color: #ffffff;
+    padding-left: 43px; /* Mantém o recuo e faz um suave deslocamento ao passar o mouse */
 }
 
 /* Botão Sair na parte inferior */
@@ -184,7 +205,7 @@ body {
     height: 25px;
 }
 
-.icon-logout:hover{
+.icon-logout a:hover{
     color: #ffffff;
 }
 

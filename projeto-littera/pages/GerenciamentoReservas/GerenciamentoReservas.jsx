@@ -1,9 +1,11 @@
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import './GerenciamentoReservas.css'
 import { useNavigate } from "react-router"
 import { PiHandArrowDownDuotone } from "react-icons/pi"; // icone emprestimos
 import { IoArrowBack } from "react-icons/io5";
 import { FaPlus } from "react-icons/fa";
+import Alert from '@mui/material/Alert';
+import CheckIcon from '@mui/icons-material/Check';
 import dayjs from "dayjs"
 import { useEffect } from "react";
 import { atualizarReserva, criarReserva, excluirReservaApi, listarReservas } from "../../services/api";
@@ -13,14 +15,30 @@ import DialogReservas from "../../components/DialogReservas/DialogReservas";
 export default function GerenciamentoReservas(){
     const [pesquisa, setPesquisa] = useState('')
     const [editar, setEditar] = useState(null)
+    const [carregando, setCarregando] = useState(false)
+    const [erro, setErro] = useState('')
     const [exibirDialog, setExibirDialog] = useState(false)
     const [reservaParaEditar, setReservaParaEditar] = useState(null)
+    const [feedback, setFeedback] = useState({ mensagem: '', tipo: '' })
     const navigate = useNavigate()
     const [reservas, setReservas] = useState([])
     
-    const reservasFiltradas = reservas.filter((reserva) =>
-    reserva.nomeUsuario.toLowerCase().includes(pesquisa.toLowerCase())
-    )
+    const normalizar = (texto) =>
+      String(texto ?? '')
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '') // remove acentos
+
+    const reservasFiltradas = useMemo(() => {
+            const termo = normalizar(pesquisa.trim())
+            if (!termo) return reservas
+        
+            return reservas.filter((u) =>
+              [u.id, u.nomeUsuario, u.tituloItemAcervo, u.status].some((campo) =>
+                normalizar(campo).includes(termo)
+              )
+            )
+          }, [reservas, pesquisa])
     
     
     function handleChange(e) {
@@ -32,30 +50,28 @@ export default function GerenciamentoReservas(){
       })
     }
 
-    useEffect(() => {
-      const fetchReservas = async () => {
-        try {
-          const data = await listarReservas();
-          setReservas(data);
-        } catch (error) {
-          console.error('Erro ao buscar reservas:', error);
-        }
-      }
-      fetchReservas()
-      }, []);
 
-    const fetchReservas = async () => {
-          try {
-            const data = await listarReservas();
-            setReservas(data);
-          } catch (error) {
-            console.error('Erro ao buscar reservas:', error);
-          }
-        };
-    
-        useEffect(() => {
-          fetchReservas();
-        }, []);
+  const fetchReservas = async () => {
+    setErro('')
+    try {
+      setCarregando(true)
+      const data = await listarReservas();
+      setReservas(data);
+    } catch (error) {
+      console.error('Erro ao buscar reservas:', error);
+      setErro('Erro ao carregar reservas')
+    }
+    finally{
+      setCarregando(false)
+    }
+  };
+
+  useEffect(() => {
+    fetchReservas();
+  }, []);
+
+  if (carregando && reservas.length === 0) return <p className='aviso-tela'>Carregando reservas...</p>
+  if (erro) return <p className='aviso-tela'>{erro}</p>
 
 
     function abrirCadastro() {
@@ -90,35 +106,45 @@ export default function GerenciamentoReservas(){
       await fetchReservas() // Agora funciona perfeitamente!
       setExibirDialog(false)
       setReservaParaEditar(null)
-      alert('Reserva salva com sucesso!')
+      setFeedback({ mensagem: 'Reserva cadastrada com sucesso!', tipo: 'success' })
     }
     catch (error) {
       console.error('Erro ao salvar reserva:', error)
-      alert('Erro ao salvar reserva na base de dados.')
+      const mensagemErro = error.response?.data?.message || 'Erro ao salvar reserva.';
+      alert(mensagemErro)
     }
 
     setEditar(null)
   }
 
-  async function excluirReserva(id){
+  async function excluirReserva(id) {
     const confirmar = window.confirm('Deseja excluir esta reserva?')
 
-    if(confirmar){
-      try{
-          await excluirReservaApi(id)
-          setReservas(reservas.filter((reserva) => reserva.id !== id))
-          alert('Reserva excluída com sucesso')
-          await fetchEmprestimos()
-      }
-      catch(error){
-          console.error('Erro ao excluir a reserva: ', error)
-          alert('Não foi possível excluir a reserva')
+    if (confirmar) {
+      try {
+        await excluirReservaApi(id)
+        setReservas((atuais) => atuais.filter((reserva) => reserva.id !== id))
+        setFeedback({ mensagem: 'Reserva excluída com sucesso!', tipo: 'success' })
+      } catch (error) {
+        const mensagemErro = error.response?.data?.message || 'Erro ao excluir reserva.';
+        setFeedback({mensagem:'', tipo:''})
+        alert(mensagemErro)
       }
     }
   }
 
     return(<>
       <div className="content-wrap">
+        {feedback.mensagem && (
+        <div style={{ marginBottom: '20px' }}>
+          <Alert
+            variant='filled'
+            severity={feedback.tipo}
+            icon={feedback.tipo === 'success' ? <CheckIcon fontSize="inherit" /> : undefined}
+          >
+            {feedback.mensagem}
+          </Alert>
+        </div>)}
         <div className="gerenciamento-emprestimos">
           {/* Cabeçalho alinhado com Flexbox */}
           <div className="cabecalho-emprestimos">
@@ -148,7 +174,7 @@ export default function GerenciamentoReservas(){
           <div className="barra-pesquisa">
             <input
               type="text"
-              placeholder="Pesquisar empréstimo por nome do usuário"
+              placeholder="Pesquisar empréstimo por nome do usuário, título do item ou status"
               value={pesquisa}
               onChange={(e) => setPesquisa(e.target.value)}
             />

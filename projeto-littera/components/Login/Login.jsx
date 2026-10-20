@@ -10,43 +10,73 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [nomeExibicao, setNomeExibicao] = useState("");
   const [logado, setLogado] = useState(false);
-  const [erro, setErro] = useState(false);
+  const [msgErro, setMsgErro] = useState("");
   const [recuperando, setRecuperando] = useState(false);
   const [sucessoMsg, setSucessoMsg] = useState(false);
   const [msgErroRecuperacao, setMsgErroRecuperacao] = useState("");
 
-  // const { login } = useAuth()
-
+  // Restaura a sessão ao recarregar a página
   useEffect(() => {
     const tokenSalvo = localStorage.getItem("token");
     const usuarioSalvo = localStorage.getItem("usuario");
     if (tokenSalvo && usuarioSalvo) {
-      const dados = JSON.parse(usuarioSalvo);
-      setNomeExibicao(dados.nome || dados.email);
-      setLogado(true);
+      try {
+        const dados = JSON.parse(usuarioSalvo);
+        if (dados.tipoUsuario === "ADMIN") {
+          setNomeExibicao(dados.nome || dados.email);
+          setLogado(true);
+        } else {
+          localStorage.removeItem("token");
+          localStorage.removeItem("usuario");
+        }
+      } catch {
+        localStorage.removeItem("token");
+        localStorage.removeItem("usuario");
+      }
     }
   }, []);
 
   const logar = async (event) => {
     event.preventDefault();
-    setErro(false);
+    setMsgErro("");
 
     try {
       const dados = await realizarLogin(email, password);
-      localStorage.setItem("token", dados.token);
-      localStorage.setItem("email", JSON.stringify(dados));
-      setNomeExibicao(dados.nome || email);
+      const { token, ...usuario } = dados;
+
+      if (usuario.tipoUsuario !== "ADMIN") {
+        setLogado(false);
+        setMsgErro("Acesso restrito a administradores.");
+        return; // não salva token nem usuário
+      }
+
+      localStorage.setItem("token", token);
+      localStorage.setItem("usuario", JSON.stringify(usuario));
+
+      setNomeExibicao(usuario.nome || usuario.email);
       setLogado(true);
     } catch (err) {
       if (email === "root" && password === "xyx123") {
+        localStorage.setItem(
+          "usuario",
+          JSON.stringify({ nome: "root", email: "root", tipoUsuario: "ADMIN" })
+        );
         setNomeExibicao("root");
         setLogado(true);
-        setErro(false);
       } else {
         setLogado(false);
-        setErro(true);
+        setMsgErro("E-mail ou senha inválidos.");
       }
     }
+  };
+
+  const sair = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("usuario");
+    setNomeExibicao("");
+    setEmail("");
+    setPassword("");
+    setLogado(false);
   };
 
   const handleRecuperarSenha = (event) => {
@@ -66,32 +96,12 @@ const Login = () => {
     }
   };
 
-  async function enviar(e){
-    e.preventDefault()   // impede o recarregamento padrão do <form>
-        try {
-            await login(email, senha)  // pode lançar erro se as credenciais falharem
-            navigate('/')        // deu certo → volta para a capa
-        } catch (erro) {
-            setAviso(erro.message)  // exibe a mensagem de erro na tela
-        }
-  }
-
-  const mensagemErro = (
-    <div style={{ color: "red" }}>
-      <h3>Usuário ou senha incorretos!</h3>
-    </div>
-  );
-
-  const exibeMenuAdmin = <MenuAside nomeUsuario={nomeExibicao || email} />;
-
   const esqueceuSenhaTela = (
     <div className="login-wrapper">
       <div className="container">
         <form onSubmit={handleRecuperarSenha}>
           <h1>Recuperar Senha</h1>
-          <p>
-            Insira o seu utilizador ("root") e defina uma nova senha de acesso.
-          </p>
+          <p>Insira o seu utilizador ("root") e defina uma nova senha de acesso.</p>
 
           <div className="input-field">
             <input
@@ -113,14 +123,6 @@ const Login = () => {
               onChange={(e) => setPassword(e.target.value)}
             />
             <FaLock className="icon" />
-          </div>
-
-          <div className="recall-forget">
-            <label>
-              <input type="checkbox" />
-              Lembre de mim
-            </label>
-            <a href="#">Esqueceu sua senha?</a>
           </div>
 
           <button type="submit" style={{ background: "#2c3e50", color: "white" }}>
@@ -155,70 +157,73 @@ const Login = () => {
     </div>
   );
 
+  if (logado) {
+    return <MenuAside nomeUsuario={nomeExibicao} onSair={sair} />;
+  }
+
+  if (recuperando) {
+    return (
+      <div>
+        <img src={logoLittera} alt="Logotipo Littera" className="logo-img" />
+        <br />
+        {esqueceuSenhaTela}
+      </div>
+    );
+  }
+
   return (
-    <>
-      {logado ? (
-        exibeMenuAdmin
-      ) : recuperando ? (
-        <div>
-          <img src={logoLittera} alt="Logotipo Littera" className="logo-img" />
-          <br />
-          {esqueceuSenhaTela}
-        </div>
-      ) : (
-        <div className="login-wrapper">
-          <img src={logoLittera} alt="Logotipo Littera" className="logo-img" />
-          <br />
-          <div className="container">
-            <form onSubmit={logar}>
-              <h1>Acesse o sistema</h1>
+    <div className="login-wrapper">
+      <img src={logoLittera} alt="Logotipo Littera" className="logo-img" />
+      <br />
+      <div className="container">
+        <form onSubmit={logar}>
+          <h1>Acesse o sistema</h1>
 
-              <div className="input-field">
-                <input
-                  type="text"
-                  placeholder="E-mail"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-                <FaUser className="icon" />
-              </div>
-
-              <div className="input-field">
-                <input
-                  type="password"
-                  placeholder="Senha"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-                <FaLock className="icon" />
-              </div>
-
-              <div className="recall-forget">
-                <label>
-                  <input type="checkbox" />
-                  Lembre de mim
-                </label>
-                <a
-                  href="#"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    setRecuperando(true);
-                    setErro(false);
-                  }}
-                >
-                  Esqueceu sua senha?
-                </a>
-              </div>
-
-              <button type="submit">Login</button>
-              {erro ? mensagemErro : ""}
-            </form>
+          <div className="input-field">
+            <input
+              type="text"
+              placeholder="E-mail"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+            <FaUser className="icon" />
           </div>
-        </div>
-      )}
-    </>
+
+          <div className="input-field">
+            <input
+              type="password"
+              placeholder="Senha"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+            <FaLock className="icon" />
+          </div>
+
+          <div className="recall-forget">
+            <a
+              href="#"
+              onClick={(e) => {
+                e.preventDefault();
+                setRecuperando(true);
+                setMsgErro("");
+              }}
+            >
+              Esqueceu sua senha?
+            </a>
+          </div>
+
+          <button type="submit">Login</button>
+
+          {msgErro && (
+            <div className="mensagem-erro">
+              <h3>{msgErro}</h3>
+            </div>
+          )}
+        </form>
+      </div>
+    </div>
   );
 };
 

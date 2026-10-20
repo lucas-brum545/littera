@@ -1,6 +1,8 @@
 import { Dialog, DialogContent, DialogTitle, Stack, DialogActions, Button, TextField, Select, MenuItem, InputLabel, FormControl } from "@mui/material";
 import { useState, useEffect } from "react";
+import Alert from '@mui/material/Alert';
 import dayjs from "dayjs";
+import DatePicker from "react-datepicker";
 
 export default function DialogReservas({ reservaParaEditar, onCancelar, onSalvar }) {
     const [dataReserva, setDataReserva] = useState(null);
@@ -74,17 +76,17 @@ export default function DialogReservas({ reservaParaEditar, onCancelar, onSalvar
                             variant="outlined" 
                             sx={{ background: 'white' }} 
                         />
-                        <TextField 
-                            label="Data da Reserva" 
-                            name="dataReserva" 
-                            required 
-                            type="date" 
-                            value={dataReserva ? dayjs(dataReserva).format('YYYY-MM-DD') : ''}
-                            onChange={(e) => setDataReserva(e.target.value ? new Date(e.target.value) : null)}
-                            variant="outlined" 
-                            sx={{ background: 'white' }} 
-                            InputLabelProps={{ shrink: true }}
-                        />
+                        <label style={{ fontSize: '14px', color: '#666', fontWeight: 'bold' }}>Data da Reserva</label>
+                        <div className="campo-datepicker">
+                            <DatePicker
+                                selected={dataReserva}
+                                onChange={(date) => setDataReserva(date)}
+                                dateFormat="dd/MM/yyyy"
+                                placeholderText="Selecione a data da reserva"
+                                className="input-datepicker-mui"
+                                wrapperClassName="date-picker-wrapper"
+                            />
+                        </div>
                         <FormControl fullWidth>
                             <InputLabel id="status-label">Status</InputLabel>
                             <Select 
@@ -99,6 +101,7 @@ export default function DialogReservas({ reservaParaEditar, onCancelar, onSalvar
                             </Select>
                         </FormControl>
                     </Stack>
+                    
                     <DialogActions sx={{ mt: 3 }}>
                         <Button type="button" onClick={() => onCancelar()} sx={{ fontWeight: 'bold', fontFamily: 'Arial' }}>
                             Cancelar

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField } from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import dayjs from 'dayjs';
@@ -10,6 +10,7 @@ export default function DialogUsuarios({ usuarioParaEditar, onCancelar, onSalvar
     nome: '',
     email: '',
     telefone: '',
+    tipoUsuario: '',
     senha: '',
   });
 
@@ -21,37 +22,43 @@ export default function DialogUsuarios({ usuarioParaEditar, onCancelar, onSalvar
         nome: usuarioParaEditar.nome || '',
         email: usuarioParaEditar.email || '',
         telefone: usuarioParaEditar.telefone || '',
+        tipoUsuario: usuarioParaEditar.tipoUsuario || '',
         senha: '',
       });
+      // Converte a string da API (ex: "1995-05-19") para objeto Date para o DatePicker ler
       setDataNascimento(
-        usuarioParaEditar.dataNascimento ? new Date(usuarioParaEditar.dataNascimento) : null
+        usuarioParaEditar.dataNascimento ? dayjs(usuarioParaEditar.dataNascimento).toDate() : null
       );
     } else {
-      setFormulario({ nome: '', email: '', telefone: '', senha: '' });
+      setFormulario({ nome: '', email: '', telefone: '', tipoUsuario: '', senha: '' });
       setDataNascimento(null);
     }
   }, [usuarioParaEditar]);
 
-  function handleSubmit(e) {
+  const handleSubmit = (e) => {
     e.preventDefault();
 
-    console.log("Valor bruto do DatePicker (dataNascimento):", dataNascimento);
-
+    // Garante que a data está formatada e monta o objeto completo diretamente do estado atual
     const dadosFormatados = {
-      ...formulario,
+      nome: formulario.nome,
+      email: formulario.email,
+      telefone: formulario.telefone,
+      tipoUsuario: formulario.tipoUsuario || 'LEITOR',
+      senha: formulario.senha,
       dataNascimento: dataNascimento ? dayjs(dataNascimento).format('YYYY-MM-DD') : null,
     };
 
-    console.log("Dados formatados que vão para a API:", dadosFormatados);
+    console.log("Dados validados que vão para a API:", dadosFormatados);
 
     onSalvar(dadosFormatados);
-  }
+  };
+
   function handleChange(e) {
     const { name, value } = e.target;
-    setFormulario({
-      ...formulario,
+    setFormulario((prev) => ({
+      ...prev,
       [name]: value,
-    });
+    }));
   }
 
   return (
@@ -106,6 +113,20 @@ export default function DialogUsuarios({ usuarioParaEditar, onCancelar, onSalvar
               />
             </div>
 
+            <FormControl fullWidth>
+              <InputLabel id="status-label">Tipo de usuário</InputLabel>
+              <Select
+                labelId="status-label"
+                name="tipoUsuario"
+                value={formulario.tipoUsuario}
+                onChange={handleChange}
+                label="Tipo de usuário"
+              >
+                <MenuItem value={'LEITOR'}>Leitor</MenuItem>
+                <MenuItem value={'ADMIN'}>Administrador</MenuItem>
+              </Select>
+            </FormControl>
+
             <TextField
               label="Senha"
               type="password"
@@ -114,6 +135,7 @@ export default function DialogUsuarios({ usuarioParaEditar, onCancelar, onSalvar
               onChange={handleChange}
               fullWidth
               placeholder={usuarioParaEditar ? 'Deixe em branco para manter a senha' : ''}
+              required={!usuarioParaEditar}
             />
           </div>
         </DialogContent>
@@ -121,7 +143,6 @@ export default function DialogUsuarios({ usuarioParaEditar, onCancelar, onSalvar
           <Button type="button" onClick={onCancelar} sx={{fontWeight: 'bold', fontFamily: 'Arial'}}>
             Cancelar
           </Button>
-          {/* CORRIGIDO: Removido o onClick={onSalvar}, deixando apenas type="submit" */}
           <Button type="submit" color="success" sx={{fontWeight: 'bold', fontFamily: 'Arial'}}>
             {usuarioParaEditar ? 'Atualizar' : 'Cadastrar'}
           </Button>

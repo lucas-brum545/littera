@@ -200,3 +200,9 @@
   width: 35px;
   height: 35px;
 }
+
+.aviso-tela{
+  text-align: center;
+  font-size: 18px;
+  font-weight: bold;
+}

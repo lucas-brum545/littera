@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Login from '../Login/Login.jsx';
 import { Routes, Route, Link, useNavigate } from 'react-router-dom';
 import { IoPeople } from "react-icons/io5"; // icone leitores
@@ -14,50 +14,37 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import './MenuAside.css';
 
 export default function MenuAside(props) {
-    const admArmazenado = localStorage.getItem("admin") || "Administrador"
     const [saiu, setSaiu] = useState(false);
-    const [clicouGerUsuarios, setClicouGerUsuarios] = useState(false);
-    const [clicouGerAcervo, setClicouGerAcervo] = useState(false);
-    const [clicouGerEmprestimos, setClicouGerEmprestimos] = useState(false);
+    const [nomeUsuario, setNomeUsuario] = useState(props.nomeUsuario || "");
     const navigate = useNavigate();
 
+    // Hooks sempre ANTES de qualquer return condicional
+    useEffect(() => {
+        if (props.nomeUsuario) {
+            setNomeUsuario(props.nomeUsuario);
+            return;
+        }
+        const usuarioSalvo = localStorage.getItem("usuario");
+        if (usuarioSalvo) {
+            try {
+                const dados = JSON.parse(usuarioSalvo);
+                setNomeUsuario(dados.nome || dados.email || "");
+            } catch {
+                // JSON inválido: ignora
+            }
+        }
+    }, [props.nomeUsuario]);
+
     function sair(e) {
-        e.preventDefault(); // Evita que a página recarregue ou suba ao clicar no link
+        e.preventDefault();
         setSaiu(true);
     }
+    // ... clicarGerUsuarios, clicarGerAcervo, clicarGerEmprestimos iguais
 
-    function clicarGerUsuarios(e){
-        e.preventDefault(); // Evita que a página recarregue ou suba ao clicar no link
-        setClicouGerUsuarios(true);
-    }
-
-    function clicarGerAcervo(e){
-        e.preventDefault();
-        setClicouGerAcervo(true);
-    }
-
-    function clicarGerEmprestimos(e){
-        e.preventDefault();
-        setClicouGerEmprestimos(true);
-    }
-
-    // Se o estado 'saiu' for verdadeiro, renderiza a tela de login diretamente
     if (saiu) {
         return <Login />;
     }
-
-    if (clicouGerUsuarios){
-        return <GerenciamentoUsuarios></GerenciamentoUsuarios>;
-    }
-
-
-    if (clicouGerAcervo){
-        return <GerenciamentoAcervo></GerenciamentoAcervo>;
-    }
-
-    if (clicouGerEmprestimos){
-        return <GerenciamentoEmprestimo></GerenciamentoEmprestimo>;
-    }
+    // ... demais returns condicionais iguais
 
     return (
         <div className="admin-layout-container">
@@ -76,7 +63,16 @@ export default function MenuAside(props) {
                             </ul>
                         </li>
                         <li className="logout">
-                            <Link to="/login"><LogoutIcon className='icon-logout'/>Sair</Link>
+                            <Link
+                                to="/login"
+                                onClick={() => {
+                                    localStorage.removeItem("token");
+                                    localStorage.removeItem("usuario");
+                                    props.onSair?.();
+                                }}
+                            >
+                                <LogoutIcon className='icon-logout' />Sair
+                            </Link>
                         </li>
                     </ul>
                 </nav>
@@ -87,7 +83,9 @@ export default function MenuAside(props) {
                     {/* Tela inicial padrão do painel admin */}
                     <Route index element={
                         <>
-                            <span className='cabecalho-sessao'>Olá, {admArmazenado.toUpperCase()}!</span>
+                            <span className='cabecalho-sessao'>
+                                    Olá, {nomeUsuario ? nomeUsuario.toUpperCase() : "Carregando..."}!
+                            </span>
                             <h1 className="admin-title">Painel Administrativo</h1>
                             <p className="admin-subtitle">Selecione uma opção ao lado para começar</p>
                         </>

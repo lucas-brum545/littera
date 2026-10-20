@@ -142,3 +142,8 @@ body{
   filter: invert(1);
   mix-blend-mode: screen;
 }
+
+.mensagem-erro{
+  color: rgb(219, 41, 41);
+  padding-top: 20px;
+}
