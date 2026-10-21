@@ -1,8 +1,10 @@
 package com.littera.api.service;
 
+import com.littera.api.dto.UsuarioCadastro;
 import com.littera.api.dto.UsuarioRequest;
 import com.littera.api.dto.UsuarioResumo;
 import com.littera.api.exception.RecursoNaoEncontradoException;
+import com.littera.api.model.TipoUsuario;
 import com.littera.api.model.Usuario;
 import com.littera.api.repository.UsuarioRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -20,6 +22,21 @@ public class UsuarioService {
         this.usuarioRepository = usuarioRepository;
         this.passwordEncoder = passwordEncoder;
     }
+// pro caso de fazermos um sistema para o usuario acessar também
+//    public void cadastrar(UsuarioCadastro usuarioCadastro){
+//        if(usuarioRepository.existsByEmail(usuarioCadastro.email())) {
+//            throw new IllegalArgumentException();
+//        }
+//
+//        Usuario usuario = new Usuario();
+//        usuario.setNome(usuarioCadastro.nome());
+//        usuario.setEmail(usuarioCadastro.email());
+//
+//        usuario.setSenhaHash(passwordEncoder.encode(usuarioCadastro.senha()));
+//        usuario.setTipoUsuario(TipoUsuario.LEITOR);
+//
+//        usuarioRepository.save(usuario);
+//    }
 
     public List<UsuarioResumo> listarTodos() {
         return usuarioRepository.findAll().stream()
@@ -33,25 +50,22 @@ public class UsuarioService {
         return UsuarioResumo.fromEntity(usuario);
     }
 
-    // No método salvar:
-    public UsuarioResumo salvar(UsuarioRequest request) {
+    public Usuario salvar(UsuarioRequest request) {
+        if (usuarioRepository.existsByEmail(request.email())) {
+            throw new IllegalArgumentException("Já existe um usuário com este e-mail.");
+        }
+
         Usuario usuario = new Usuario();
         usuario.setNome(request.nome());
         usuario.setEmail(request.email());
         usuario.setTelefone(request.telefone());
-        usuario.setDataNascimento(request.dataNascimento());
+        usuario.setDataNascimento(request.dataNascimento()); // Garante que a data é atribuída aqui
+        usuario.setTipoUsuario(request.tipoUsuario() != null ? request.tipoUsuario() : TipoUsuario.LEITOR);
 
-        if (request.tipoUsuario() != null) {
-            usuario.setTipoUsuario(request.tipoUsuario());
-        }
+        // Criptografa a senha
+        usuario.setSenhaHash(passwordEncoder.encode(request.senha()));
 
-        // Encripta a senha antes de guardar na base de dados
-        if (request.senha() != null && !request.senha().isBlank()) {
-            usuario.setSenhaHash(passwordEncoder.encode(request.senha()));
-        }
-
-        Usuario salvo = usuarioRepository.save(usuario);
-        return UsuarioResumo.fromEntity(salvo);
+        return usuarioRepository.save(usuario);
     }
 
     // UPDATE - Atualizar usuário existente de forma segura

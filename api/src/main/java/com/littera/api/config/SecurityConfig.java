@@ -35,7 +35,7 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
+        return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
@@ -45,22 +45,36 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST, "/api/auth/login", "/auth/login").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/usuarios/**", "/usuarios/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/usuarios/**", "/usuarios/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/usuarios/**", "/usuarios/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/usuarios/**", "/usuarios/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/usuarios/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/livros/**", "/livros/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/livros/**").permitAll()
+                        .requestMatchers(HttpMethod.PUT, "/api/livros/**", "/livros/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/livros/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/livros/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/revistas/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/revistas/**", "/revistas/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/revistas/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/emprestimos/**", "/emprestimos/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/emprestimos/**").permitAll()
+                        .requestMatchers(HttpMethod.PUT, "/api/emprestimos/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/emprestimos/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/reservas/**", "/reservas/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/reservas/**").permitAll()
+                        .requestMatchers(HttpMethod.PUT, "/api/reservas/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/reservas/**").permitAll()
+                        .requestMatchers(HttpMethod.DELETE, "/api/reservas/**").permitAll()
                         .anyRequest().authenticated()
                 )
-                .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class);
-
-        return http.build();
+                .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
+                .build();
     }
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
-    }
-
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
     }
 
     @Bean

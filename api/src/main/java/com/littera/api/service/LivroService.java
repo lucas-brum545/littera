@@ -28,7 +28,7 @@ public class LivroService {
                 livro.getTitulo(),
                 livro.getAutor(),
                 livro.getAno(),
-                livro.getDisponivel(),
+                livro.isDisponivel(),
                 livro.getTipoItemAcervo(),
                 livro.getLocalizacao()
         );

@@ -22,8 +22,11 @@ public class Emprestimo {
     @Column(name = "data_emprestimo", nullable = false)
     private LocalDate dataEmprestimo = LocalDate.now();
 
-    @Column(name = "data_devolucao")
-    private LocalDate dataDevolucao;
+    @Column(name = "data_devolucao_prevista", nullable = false)
+    private LocalDate dataDevolucaoPrevista;
+
+    @Column(name = "data_devolucao_real") // Fica null enquanto o livro estiver emprestado e preenche-se na baixa
+    private LocalDate dataDevolucaoReal;
 
     // Construtores, Getters e Setters
 
@@ -60,11 +63,15 @@ public class Emprestimo {
         this.dataEmprestimo = dataEmprestimo;
     }
 
-    public LocalDate getDataDevolucao() {
-        return dataDevolucao;
+    public LocalDate getDataDevolucaoPrevista() {
+        return dataDevolucaoPrevista;
     }
 
-    public void setDataDevolucao(LocalDate dataDevolucao) {
-        this.dataDevolucao = dataDevolucao;
+    public void setDataDevolucaoPrevista(LocalDate dataDevolucao) {
+        this.dataDevolucaoPrevista = dataDevolucao;
     }
+
+    public LocalDate getDataDevolucaoReal() { return dataDevolucaoReal; }
+
+    public void setDataDevolucaoReal(LocalDate dataDevolucaoReal) { this.dataDevolucaoReal = dataDevolucaoReal; }
 }

@@ -57,19 +57,34 @@ public class ReservaService {
     // CREATE - Criar nova reserva
     public ReservaResponse salvar(ReservaRequest request) {
         Usuario usuario = usuarioRepository.findById(request.usuarioId())
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado com o ID: " + request.usuarioId()));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado."));
 
         ItemAcervo item = itemAcervoRepository.findById(request.itemCodigo())
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Item do acervo não encontrado com o código: " + request.itemCodigo()));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Item do acervo não encontrado."));
 
+        // 1. Validação de Bloqueio do Utilizador
+        if (usuario.getBloqueado()) {
+            if (usuario.getDataFimBloqueio() != null && LocalDate.now().isBefore(usuario.getDataFimBloqueio())) {
+                throw new RuntimeException("Usuário bloqueado. Não pode realizar reservas.");
+            } else {
+                usuario.setBloqueado(false);
+                usuario.setDataFimBloqueio(null);
+                usuarioRepository.save(usuario);
+            }
+        }
+
+        // 2. Regra: Só se reserva o que está emprestado/indisponível
+        if (item.isDisponivel()) {
+            throw new RuntimeException("Este item está disponível na biblioteca. Pode realizar o empréstimo direto.");
+        }
+
+        // 3. Criação da Reserva
         Reserva reserva = new Reserva();
         reserva.setUsuario(usuario);
         reserva.setItemAcervo(item);
-        reserva.setDataReserva(request.dataReserva() != null ? request.dataReserva() : LocalDate.now());
-
-        if (request.status() != null && !request.status().isBlank()) {
-            reserva.setStatus(request.status());
-        }
+        reserva.setDataReserva(LocalDate.now());
+        // Poderia ter um campo status, ex: "ATIVA", "CONCLUIDA", "CANCELADA"
+        reserva.setStatus("ATIVA");
 
         Reserva salva = reservaRepository.save(reserva);
         return ReservaResponse.fromEntity(salva);

@@ -52,7 +52,7 @@ public abstract class ItemAcervo {
         this.ano = ano;
     }
 
-    public Boolean getDisponivel() {
+    public Boolean isDisponivel() {
         return disponivel;
     }
 

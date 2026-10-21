@@ -24,7 +24,7 @@ public class RevistaService {
                 revista.getCodigo(),
                 revista.getTitulo(),
                 revista.getAno(),
-                revista.getDisponivel(),
+                revista.isDisponivel(),
                 revista.getTipoItemAcervo(),
                 revista.getEdicao(),
                 revista.getIssn(),

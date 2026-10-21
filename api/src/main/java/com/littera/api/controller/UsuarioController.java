@@ -2,6 +2,7 @@ package com.littera.api.controller;
 
 import com.littera.api.dto.UsuarioRequest;
 import com.littera.api.dto.UsuarioResumo;
+import com.littera.api.model.Usuario;
 import com.littera.api.service.UsuarioService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,8 +32,8 @@ public class UsuarioController {
 
     @PostMapping
     public ResponseEntity<UsuarioResumo> criar(@RequestBody UsuarioRequest request) {
-        UsuarioResumo novoUsuario = usuarioService.salvar(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(novoUsuario);
+        Usuario novoUsuario = usuarioService.salvar(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(UsuarioResumo.fromEntity(novoUsuario));
     }
 
     @PutMapping("/{id}")

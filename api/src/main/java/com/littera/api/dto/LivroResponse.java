@@ -25,7 +25,7 @@ public record LivroResponse(
                 livro.getTitulo(),
                 livro.getAno(),
                 livro.getTipoItemAcervo(),
-                livro.getDisponivel(),
+                livro.isDisponivel(),
                 livro.getLocalizacao(),
                 livro.getAutor(),
                 livro.getIsbn(),

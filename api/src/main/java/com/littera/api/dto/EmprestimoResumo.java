@@ -9,7 +9,8 @@ public record EmprestimoResumo(
         String nomeUsuario,
         String tituloItem,
         LocalDate dataEmprestimo,
-        LocalDate dataDevolucao
+        LocalDate dataDevolucaoPrevista,
+        LocalDate dataDevolucaoReal
 ) {
     public static EmprestimoResumo fromEntity(Emprestimo emprestimo) {
         return new EmprestimoResumo(
@@ -17,7 +18,8 @@ public record EmprestimoResumo(
                 emprestimo.getUsuario() != null ? emprestimo.getUsuario().getNome() : null,
                 emprestimo.getItemAcervo() != null ? emprestimo.getItemAcervo().getTitulo() : null,
                 emprestimo.getDataEmprestimo(),
-                emprestimo.getDataDevolucao()
+                emprestimo.getDataDevolucaoPrevista(),
+                emprestimo.getDataDevolucaoReal()
         );
     }
 }

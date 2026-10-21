@@ -42,6 +42,12 @@ public class Usuario implements UserDetails {
     @Column(name = "quantidade_emprestada", nullable = false)
     private Integer quantidadeEmprestada = 0;
 
+    @Column(nullable = false)
+    private Boolean bloqueado = false;
+
+    @Column(name = "data_fim_bloqueio")
+    private LocalDate dataFimBloqueio;
+
     public Long getId() {
         return id;
     }
@@ -104,6 +110,22 @@ public class Usuario implements UserDetails {
 
     public void setQuantidadeEmprestada(Integer quantidadeEmprestada) {
         this.quantidadeEmprestada = quantidadeEmprestada;
+    }
+
+    public Boolean getBloqueado() {
+        return bloqueado;
+    }
+
+    public void setBloqueado(Boolean bloqueado) {
+        this.bloqueado = bloqueado;
+    }
+
+    public LocalDate getDataFimBloqueio() {
+        return dataFimBloqueio;
+    }
+
+    public void setDataFimBloqueio(LocalDate dataFimBloqueio) {
+        this.dataFimBloqueio = dataFimBloqueio;
     }
 
     @Override
