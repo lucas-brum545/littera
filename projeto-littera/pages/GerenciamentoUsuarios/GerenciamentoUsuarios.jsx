@@ -12,7 +12,6 @@ import DialogUsuarios from '../../components/DialogUsuarios/DialogUsuarios'
 function GerenciamentoUsuarios() {
   const navigate = useNavigate();
   const [usuarios, setUsuarios] = useState([])
-  const [usuarioParaExcluir, setUsuarioParaExcluir] = useState(null)
   const [carregando, setCarregando] = useState(true)
   const [erro, setErro] = useState('')
   const [exibirDialog, setExibirDialog] = useState(false)
@@ -66,24 +65,24 @@ function GerenciamentoUsuarios() {
 
   // funciona tanto para edicao quanto para adicao
   async function salvarUsuario(dados) {
-  try {
-    if (usuarioParaEditar) {
-      await atualizarUsuario(usuarioParaEditar.id, dados);
-    } else {
-      await criarUsuario(dados);
+    try {
+      if (usuarioParaEditar) {
+        await atualizarUsuario(usuarioParaEditar.id, dados);
+      } else {
+        await criarUsuario(dados);
+      }
+
+      await fetchUsuarios();
+      setExibirDialog(false);
+      setUsuarioParaEditar(null);
+      setFeedback({ mensagem: 'Usuário salvo com sucesso!', tipo: 'success' })
+
+    } catch (error) {
+      console.error('Detalhes do erro ao salvar usuário:', error);
+      const mensagemErro = error.response.data.message || 'Erro ao salvar usuário.';
+      alert(mensagemErro)
     }
-
-    await fetchUsuarios();
-    setExibirDialog(false);
-    setUsuarioParaEditar(null);
-    setFeedback({ mensagem: 'Usuário salvo com sucesso!', tipo: 'success' })
-
-  } catch (error) {
-    console.error('Detalhes do erro ao salvar usuário:', error);
-    const mensagemErro = error.response?.data?.message || 'Erro ao salvar usuário.';
-    alert(mensagemErro)
   }
-}
 
   setTimeout(() => {
     setFeedback({ mensagem: '', tipo: '' });
@@ -136,10 +135,10 @@ function GerenciamentoUsuarios() {
               setUsuarioParaEditar(null)
               setExibirDialog(true)
             }}>
-              <FaPlus className='icon'/>
+              Cadastrar Novo Usuário
             </button>
             <button type="button" className="botao-voltar" onClick={() => navigate('/admin')}>
-              <IoArrowBack className='icon'/>
+              Voltar
             </button>
           </div>
         </div>

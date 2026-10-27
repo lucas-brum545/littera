@@ -2,14 +2,14 @@
   flex: 1;
 }
 
-/* cabeçalho da pagina */
+
 .gerenciamento-usuarios {
-  width: 1000px;
+  width: max-content;
   box-sizing: border-box;
   flex-direction: column;
-  min-height: 100vh;
 }
 
+/* cabeçalho da pagina */
 .cabecalho-usuarios {
   display: flex;
   justify-content: space-between;
@@ -47,20 +47,43 @@
   border: none;
   background: #028a0d;
   color: white;
-  padding: 12px;
+  padding: 8px;
   border-radius: 6px;
   height: 60px;
   cursor: pointer;
   font-size: 15px;
+  font-weight: bold;
+  letter-spacing: 0.75px;
+  padding: 8px;
+  transition: filter 0.2s ease;
+  opacity: 1 !important;
 }
 
 .botao-novo:hover {
-  opacity: 0.7;
+  filter: brightness(1.2);
 }
 
 .barra-pesquisa {
   margin-bottom: 20px;
   margin-top: 10px;
+}
+
+.botao-voltar{
+  border: none;
+  background: #2c3e50;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: bold;
+  letter-spacing: 0.75px;
+  padding: 8px;
+  transition: filter 0.2s ease;
+  opacity: 1 !important;
+}
+
+.botao-voltar:hover{
+  filter: brightness(1.2);
 }
 
 .barra-pesquisa input {
@@ -135,13 +158,11 @@
 }
 
 .tabela-container {
-  width: 100%;
   overflow-x: auto;
   border-radius: 6px;
 }
 
 .tabela-container table {
-  width: 100%;
   border-collapse: collapse;
   background: white;
 }
@@ -178,18 +199,7 @@
   color: #777;
 }
 
-.botao-voltar{
-  border: none;
-  background: #2c3e50;
-  color: white;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 15px;
-}
 
-.botao-voltar:hover{
-  opacity: 0.7;
-}
 
 /* Força a cor preta nas células e cabeçalhos da tabela de usuarios */
 .tabela-container th,

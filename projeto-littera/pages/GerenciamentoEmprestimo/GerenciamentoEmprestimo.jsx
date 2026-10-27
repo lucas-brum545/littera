@@ -2,8 +2,6 @@ import { useState, useEffect, useMemo } from "react"
 import './GerenciamentoEmprestimo.css'
 import { useNavigate } from "react-router"
 import { PiHandArrowDownDuotone } from "react-icons/pi";
-import { IoArrowBack } from "react-icons/io5";
-import { FaPlus } from "react-icons/fa";
 import Alert from '@mui/material/Alert';
 import CheckIcon from '@mui/icons-material/Check';
 import dayjs from "dayjs"
@@ -91,8 +89,8 @@ export default function GerenciamentoEmprestimo(){
           }
        catch (error) {
           console.error('Erro ao salvar empréstimo:', error)
-          const mensagemErro = error.response?.data?.message || 'Erro ao salvar empréstimo.';
-          setFeedback({ mensagem: mensagemErro, tipo: 'error' })
+          const mensagemErro = error.response.data.message || 'Erro ao salvar empréstimo.';
+          alert(mensagemErro)
         }
 
       setEditar(null)
@@ -110,7 +108,7 @@ export default function GerenciamentoEmprestimo(){
         }
         catch(error){
           console.error('Erro ao excluir o empréstimo: ', error)
-          const mensagemErro = error.response?.data?.message || 'Erro ao excluir empréstimo.';
+          const mensagemErro = error.response.data.message || 'Erro ao excluir empréstimo.';
           alert(mensagemErro)
         }
       }
@@ -151,11 +149,11 @@ export default function GerenciamentoEmprestimo(){
                 setEmprestimoParaEditar(null)
                 setExibirDialog(true)
               }}>
-                <FaPlus/>
+                Cadastrar Novo Empréstimo
               </button>
                 
               <button type="button" className="botao-voltar" onClick={() => navigate('/admin')}>
-                <IoArrowBack/>
+                Voltar
               </button>
             </div>
           </div>

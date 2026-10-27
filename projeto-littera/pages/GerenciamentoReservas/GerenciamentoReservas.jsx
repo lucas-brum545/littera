@@ -110,7 +110,7 @@ export default function GerenciamentoReservas(){
     }
     catch (error) {
       console.error('Erro ao salvar reserva:', error)
-      const mensagemErro = error.response?.data?.message || 'Erro ao salvar reserva.';
+      const mensagemErro = error.response.data.message || 'Erro ao salvar reserva.';
       alert(mensagemErro)
     }
 
@@ -126,8 +126,7 @@ export default function GerenciamentoReservas(){
         setReservas((atuais) => atuais.filter((reserva) => reserva.id !== id))
         setFeedback({ mensagem: 'Reserva excluída com sucesso!', tipo: 'success' })
       } catch (error) {
-        const mensagemErro = error.response?.data?.message || 'Erro ao excluir reserva.';
-        setFeedback({mensagem:'', tipo:''})
+        const mensagemErro = error.response.data.message || 'Erro ao excluir reserva.';
         alert(mensagemErro)
       }
     }
@@ -162,11 +161,11 @@ export default function GerenciamentoReservas(){
                 setReservaParaEditar(null);
                 setExibirDialog(true);
               }}>
-                <FaPlus/>
+                Cadastrar Nova Reserva
               </button>
                 
               <button type="button" className="botao-voltar" onClick={() => navigate('/admin')}>
-                <IoArrowBack/>
+                Voltar
               </button>
             </div>
           </div>
@@ -185,7 +184,7 @@ export default function GerenciamentoReservas(){
               <thead>
                 <tr>
                   <th>Código</th>
-                  <th>Nome usuário</th>
+                  <th>Nome do usuário</th>
                   <th>Título do item</th>
                   <th>Data de Reserva</th>
                   <th>Status</th>

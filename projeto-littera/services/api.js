@@ -73,69 +73,48 @@ export async function excluirUsuarioApi(id) {
     }
 }
 
-// --- CRUD DE LIVROS ---
+// --- CRUD DE ACERVO ---
 
-export async function listarLivros() {
-    try {
-        const { data } = await api.get('api/livros');
+export async function criarItemAcervo(dados){
+    try{
+        const { data } = await api.post('api/acervo', dados)
+        return data
+    } catch(error){
+        console.error('Erro ao criar item de acervo: ', error)
+        throw error
+    }
+}
+
+export async function atualizarItemAcervo(id, dados){
+    try{
+        const { data } = await api.put(`api/acervo/${id}`, dados);
         return data;
-    } catch (error) {
-        console.error('Erro ao listar livros:', error);
+    }catch (error) {
+        console.error('Erro ao atualizar item do acervo:', error);
         throw error;
     }
 }
 
-export async function criarLivro(livro) {
+export async function excluirItemAcervo(id){
     try {
-        const { data } = await api.post('api/livros', livro);
+        const { data } = await api.delete(`api/acervo/${id}`);
         return data;
     } catch (error) {
-        console.error('Erro ao criar o livro:', error);
+        console.error('Erro ao deletar o item do acervo:', error);
+        throw error;
+    }   
+}
+
+export async function listarItensAcervo() {
+    try {
+        const { data } = await api.get('api/acervo');
+        return data;
+    } catch (error) {
+        console.error('Erro ao listar itens do acervo:', error);
         throw error;
     }
 }
 
-export async function deletarLivro(id) {
-    try {
-        const { data } = await api.delete(`api/livros/${id}`);
-        return data;
-    } catch (error) {
-        console.error('Erro ao deletar o livro:', error);
-        throw error;
-    }
-}
-
-// --- CRUD DE REVISTAS ---
-
-export async function listarRevistas() {
-    try {
-        const { data } = await api.get('api/revistas');
-        return data;
-    } catch (error) {
-        console.error('Erro ao listar revistas:', error);
-        throw error;
-    }
-}
-
-export async function criarRevista(revista) {
-    try {
-        const { data } = await api.post('api/revistas', revista);
-        return data;
-    } catch (error) {
-        console.error('Erro ao criar a revista:', error);
-        throw error;
-    }
-}
-
-export async function deletarRevista(id) {
-    try {
-        const { data } = await api.delete(`api/revistas/${id}`);
-        return data;
-    } catch (error) {
-        console.error('Erro ao deletar a revista:', error);
-        throw error;
-    }
-}
 
 // --- CRUD DE EMPRÉSTIMOS ---
 
@@ -167,6 +146,16 @@ export async function excluirEmprestimoApi(id){
         console.error('Erro ao deletar o empréstimo:', error);
         throw error;
     }   
+}
+
+export async function listarEmprestimos() {
+    try {
+        const { data } = await api.get('api/emprestimos');
+        return data;
+    } catch (error) {
+        console.error('Erro ao listar empréstimos:', error);
+        throw error;
+    }
 }
 
 // --- CRUD DE RESERVAS ---
@@ -209,19 +198,6 @@ export async function excluirReservaApi(id){
         console.error('Erro ao deletar o empréstimo:', error);
         throw error;
     } 
-}
-
-// --- OUTROS MÓDULOS ---
-
-
-export async function listarEmprestimos() {
-    try {
-        const { data } = await api.get('api/emprestimos');
-        return data;
-    } catch (error) {
-        console.error('Erro ao listar empréstimos:', error);
-        throw error;
-    }
 }
 
 export default api;

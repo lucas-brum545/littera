@@ -1,6 +1,6 @@
-import { Dialog, DialogContent, DialogTitle, Stack, DialogActions, Button, TextField, Select, MenuItem, InputLabel, FormControl } from "@mui/material";
+import { Dialog, DialogContent, DialogTitle, Stack, DialogActions, Button, TextField, Select, MenuItem, InputLabel, FormControl, Autocomplete } from "@mui/material";
 import { useState, useEffect } from "react";
-import Alert from '@mui/material/Alert';
+import { listarItensAcervo, listarUsuarios } from "../../services/api";
 import dayjs from "dayjs";
 import DatePicker from "react-datepicker";
 
@@ -11,6 +11,36 @@ export default function DialogReservas({ reservaParaEditar, onCancelar, onSalvar
         itemCodigo: '',
         status: 'PENDENTE'
     });
+    const [tipo, setTipo] = useState('LIVRO');
+    const [usuarios, setUsuarios] = useState([]);
+    const [itensAcervo, setItensAcervo] = useState([])
+
+    // rotina que carrega os usuarios para selecao
+    useEffect(() => {
+        async function carregarUsuarios() {
+            try {
+                const data = await listarUsuarios();
+                setUsuarios(data);
+            } catch (error) {
+                console.error('Erro ao buscar usuários:', error);
+            }
+        }
+        carregarUsuarios();
+    }, []);
+
+    // rotina que carrega os itens de acervo para selecao
+    useEffect(() => {
+        async function carregarAcervo() {
+            try {
+                const data = await listarItensAcervo();
+                setItensAcervo(data);
+            } catch (error) {
+                console.error('Erro ao buscar acervo:', error);
+            }
+        }
+        carregarAcervo();
+    }, []);
+    
 
     useEffect(() => {
         if (reservaParaEditar) {
@@ -27,7 +57,29 @@ export default function DialogReservas({ reservaParaEditar, onCancelar, onSalvar
             setDataReserva(null);
         }
     }, [reservaParaEditar]);
-    
+
+    useEffect(() => {
+        if (reservaParaEditar && itensAcervo.length > 0) {
+            const item = itensAcervo.find((i) => i.codigo === Number(reservaParaEditar.codigoItemAcervo));
+            if (item) setTipo(item.tipo);
+        }
+    }, [reservaParaEditar, itensAcervo]);
+
+    // Na edição o item emprestado pode estar indisponível; no cadastro só os disponíveis
+    const opcoesItens = itensAcervo.filter(
+        (i) => i.tipo === tipo && (i.disponivel || reservaParaEditar)
+    );
+
+    const rotuloItem = (i) =>
+        i.tipo === 'LIVRO'
+            ? `${i.titulo} - ${i.autor} (${i.genero})`
+            : `${i.titulo} - ed. ${i.edicao}`;
+
+    function trocarTipo(e) {
+        setTipo(e.target.value);
+        setFormulario({ ...formulario, codigoItemAcervo: '' });
+    }
+
     function handleChange(e) {
         const { name, value } = e.target;
         setFormulario({ ...formulario, [name]: value });
@@ -58,23 +110,45 @@ export default function DialogReservas({ reservaParaEditar, onCancelar, onSalvar
             <DialogContent>
                 <form onSubmit={enviar}>
                     <Stack spacing={2} sx={{ mt: 2 }}>
-                        <TextField 
-                            label="Código do Usuário" 
-                            name="usuarioId" 
-                            required 
-                            value={formulario.usuarioId}
-                            onChange={handleChange}
-                            variant="outlined" 
-                            sx={{ background: 'white' }} 
+                        <Autocomplete
+                            disablePortal
+                            options={usuarios}
+                            getOptionLabel={(u) => `${u.nome} (${u.email})`}
+                            isOptionEqualToValue={(opcao, valor) => opcao.id === valor.id}
+                            value={usuarios.find((u) => u.id === Number(formulario.codigoUsuario)) || null}
+                            onChange={(e, usuario) =>
+                                setFormulario({ ...formulario, codigoUsuario: usuario ? usuario.id : '' })
+                            }
+                            disabled={!!reservaParaEditar}
+                            renderInput={(params) => <TextField {...params} label="Selecionar usuário" required />}
                         />
-                        <TextField 
-                            label="Código do Item" 
-                            name="itemCodigo" 
-                            required 
-                            value={formulario.itemCodigo}
-                            onChange={handleChange}
-                            variant="outlined" 
-                            sx={{ background: 'white' }} 
+                        <FormControl fullWidth disabled={!!reservaParaEditar}>
+                            <InputLabel id="tipo-item-label">Tipo de item</InputLabel>
+                            <Select
+                                labelId="tipo-item-label"
+                                label="Tipo de item"
+                                value={tipo}
+                                onChange={trocarTipo}
+                            >
+                                <MenuItem value="LIVRO">Livro</MenuItem>
+                                <MenuItem value="REVISTA">Revista</MenuItem>
+                            </Select>
+                        </FormControl>
+
+                        <Autocomplete
+                            disablePortal
+                            options={opcoesItens}
+                            getOptionLabel={rotuloItem}
+                            isOptionEqualToValue={(opcao, valor) => opcao.codigo === valor.codigo}
+                            value={opcoesItens.find((i) => i.codigo === Number(formulario.codigoItemAcervo)) || null}
+                            onChange={(e, item) =>
+                                setFormulario({ ...formulario, codigoItemAcervo: item ? item.codigo : '' })
+                            }
+                            disabled={!!reservaParaEditar}
+                            noOptionsText="Nenhum item disponível"
+                            renderInput={(params) => (
+                                <TextField {...params} label={tipo === 'LIVRO' ? 'Selecionar livro' : 'Selecionar revista'} required />
+                            )}
                         />
                         <label style={{ fontSize: '14px', color: '#666', fontWeight: 'bold' }}>Data da Reserva</label>
                         <div className="campo-datepicker">

@@ -5,52 +5,38 @@ import { IoPeople } from "react-icons/io5";
 import { IoArrowBack } from "react-icons/io5";
 import { FaPlus } from "react-icons/fa";
 import './GerenciamentoAcervo.css'
-import {listarLivros} from '../../services/api'
-import {listarRevistas} from '../../services/api'
+import { atualizarItemAcervo, criarItemAcervo, excluirItemAcervo, listarItensAcervo } from '../../services/api'
 import { ImBooks } from 'react-icons/im';
 
 function GerenciamentoAcervo() {
   const navigate = useNavigate();
-  // itens do acervo (livros e revistas) agora vao vir de uma api
-  const [livros, setLivros] = useState([])
-  const [revistas, setRevistas] = useState([])
+  const [itensAcervo, setItensAcervo] = useState([])
   const [carregando, setCarregando] = useState(true)
+  const [exibirDialog, setExibirDialog] = useState(false)
   const [erro, setErro] = useState('')
+  const [itemParaEditar, setItemParaEditar] = useState(null)
+  const [pesquisa, setPesquisa] = useState('')
+  const [feedback, setFeedback] = useState({ mensagem: '', tipo: '' })
+
   // const usuariosFiltrados = usuarios.filter((usuario) =>
   //   usuario.nome.toLowerCase().includes(pesquisa.toLowerCase())
   // )
 
-
-
   useEffect(() => {
     const fetchItensAcervo = async () => {
       try {
-        const data = await listarLivros();
-        setLivros(data);
+        const data = await listarItensAcervo();
+        setItensAcervo(data);
       } catch (error) {
-        console.error('Erro ao buscar livros:', error);
-        setErro('Erro ao buscar livros.');
+        console.error('Erro ao buscar itens do acervo:', error);
+        setErro('Erro ao buscar itens do acervo.');
       }
     };
 
     fetchItensAcervo();
   }, []);
 
-  useEffect(() => {
-    const fetchRevistas = async () => {
-      try {
-        const data = await listarRevistas();
-        setRevistas(data);
-      } catch (error) {
-        console.error('Erro ao buscar revistas:', error);
-        setErro('Erro ao buscar revistas.');
-      }
-    };
-
-    fetchRevistas();
-  }, []);
-
-  const [pesquisa, setPesquisa] = useState('')
+  
   const [mostrarFormulario, setMostrarFormulario] = useState(false)
   const [editando, setEditando] = useState(null)
 
@@ -72,74 +58,40 @@ function GerenciamentoAcervo() {
     })
   }
 
-  function abrirCadastro() {
-    setEditando(null)
-
-    setFormulario({
-      nome: '',
-      email: '',
-      telefone: '',
-    })
-
-    setMostrarFormulario(true)
+  async function salvarItemAcervo(dados) {
+     try {
+          if (itemParaEditar) {
+            await atualizarItemAcervo(itemParaEditar.id, dados);
+          } else {
+            await criarItemAcervo(dados);
+          }
+    
+          await fetchItensAcervo();
+          setExibirDialog(false);
+          setItemParaEditar(null);
+          setFeedback({ mensagem: 'Item do acervo salvo com sucesso!', tipo: 'success' })
+    
+        } catch (error) {
+          const mensagemErro = error.response.data.message || 'Erro ao salvar item no acervo.';
+          alert(mensagemErro)
+        }
   }
 
-  function editarItemAcervo(itemAcervo) {
-    setEditando(itemAcervo.id)
-
-    setFormulario({
-      nome: itemAcervo.nome,
-      email: itemAcervo.email,
-      telefone: itemAcervo.telefone,
-    })
-
-    setMostrarFormulario(true)
-  }
-
-  function salvarItemAcervo(e) {
-    e.preventDefault()
-
-    if (!formulario.nome || !formulario.email || !formulario.telefone) {
-      alert('Preencha todos os campos.')
-      return
-    }
-
-    if (editando !== null) {
-      setUsuarios(
-        usuarios.map((usuario) =>
-          usuario.id === editando
-            ? { ...usuario, ...formulario }
-            : usuario
-        )
-      )
-    } else {
-      const novoUsuario = {
-        id: Date.now(),
-        ...formulario,
+  async function excluirItemAcervo(id) {
+      const confirmar = window.confirm(`Tem certeza que deseja excluir este item do acervo? ID: ${id}`)
+  
+      if (confirmar) {
+        try {
+          await excluirItemAcervo(id)
+          setItensAcervo(itensAcervo.filter((item) => item.id !== id))
+          setFeedback({ mensagem: 'Item excluído do acervo com sucesso!', tipo: 'success' })
+        } catch (error) {
+          console.error('Erro ao excluir item do acervo:', error)
+          const mensagemErro = error.response?.data?.message || 'Erro ao item do acervo.';
+          setFeedback({ mensagem: mensagemErro, tipo: 'error' })
+        }
       }
-
-      setUsuarios([...usuarios, novoUsuario])
     }
-
-    setFormulario({
-      nome: '',
-      email: '',
-      telefone: '',
-    })
-
-    setEditando(null)
-    setMostrarFormulario(false)
-  }
-
-  function excluirUsuario(id) {
-    const confirmar = window.confirm(
-      'Tem certeza que deseja excluir este usuário?'
-    )
-
-    if (confirmar) {
-      setUsuarios(usuarios.filter((usuario) => usuario.id !== id))
-    }
-  }
 
   
   return (
@@ -169,7 +121,9 @@ function GerenciamentoAcervo() {
         />
       </div>
 
-      {mostrarFormulario && (
+      {/* {exibirDialog && } */}
+
+      {/* {mostrarFormulario && (
         <div className="formulario-usuario-wrapper">
         <form className="formulario-usuario" onSubmit={salvarUsuario}>
           <h2>
@@ -219,9 +173,9 @@ function GerenciamentoAcervo() {
           </div>
         </form>
         </div>
-      )}
+      )} */}
 
-      <h1>Revistas</h1>
+      {/* <h1>Revistas</h1>
       <br />
       <div className="tabela-container">
         <table>
@@ -270,7 +224,7 @@ function GerenciamentoAcervo() {
           </tbody>
         </table>
       </div>
-
+      <br />
       <h1>Livros</h1>
       <br />
 
@@ -322,7 +276,7 @@ function GerenciamentoAcervo() {
       </div>
       <br />
       
-      <br />
+      <br /> */}
     </div>
     </div>
   )
