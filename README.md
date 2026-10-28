@@ -13,7 +13,6 @@ Milton Correa Martins
 
 Karoline Zimmer de Oliveira 
 
-Viviane Cardoso Rocha
 
 - Frequência de Relatórios e Meets com Líderes:
       - Relatórios Quinzenais: Cada grupo deve enviar um relatório quinzenalmente, detalhando o progresso, dificuldades e planos para a próxima semana.
