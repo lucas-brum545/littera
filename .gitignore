@@ -22,3 +22,16 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Variáveis de ambiente e segredos
+.env
+.env.*
+!.env.example
+
+# Arquivos de backup
+*.backup
+*.bak
+*.old
+*~
+# Código legado e cópias de segurança locais
+/backups/
