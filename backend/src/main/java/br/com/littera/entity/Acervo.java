@@ -29,7 +29,7 @@ public class Acervo {
     private Integer emprestados = 0;
     private String localizacao;
   
-    @Column(columnDefinition = "LONGTEXT")
+    @Column(columnDefinition = "TEXT")
     private String capa;
 
     @Column(columnDefinition = "TEXT")
