@@ -34,8 +34,11 @@ dependencies {
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
-
+	implementation platform("org.springframework.ai:spring-ai-bom:2.0.0")
+	// Replace the following with the specific module dependencies (e.g., spring-ai-openai) or starter modules (e.g., spring-ai-starter-model-openai) that you wish to use
+	implementation 'org.springframework.ai:spring-ai-openai'
 	// Optional: For testing security configurations
+	implementation 'org.springframework.ai:spring-ai-starter-model-ollama'
 	testImplementation 'org.springframework.security:spring-security-test'
 }
 

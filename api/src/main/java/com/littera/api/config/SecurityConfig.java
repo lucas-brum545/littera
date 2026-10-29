@@ -66,6 +66,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "/api/reservas/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/reservas/**").permitAll()
                         .requestMatchers(HttpMethod.DELETE, "/api/reservas/**").permitAll()
+                        .requestMatchers("/api/admin/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
