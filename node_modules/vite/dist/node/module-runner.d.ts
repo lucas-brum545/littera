@@ -37,6 +37,7 @@ interface HotModule {
 interface HotCallback {
   deps: string[];
   fn: (modules: Array<ModuleNamespace | undefined>) => void;
+  exports?: readonly string[];
 }
 interface HMRLogger {
   error(msg: string | Error): void;
