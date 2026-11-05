@@ -94,7 +94,7 @@ function App() {
 
       setItensAcervo(itens);
     } catch (erro) {
-      console.error("Erro ao carregar acervo:", erro);
+      console.error("Erro ao carregar acervo:", erro.response.data || erro.message || erro);
       setErro('Erro ao carregar acervo.');
       setErroBanco("Não foi possível carregar o acervo do servidor.");
     } finally {
