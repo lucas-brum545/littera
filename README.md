@@ -13,17 +13,22 @@ Milton Correa Martins
 
 Karoline Zimmer de Oliveira 
 
+PROS INTEGRANTES DO PROJETO, COMO COMPILAR E EXECUTAR:
 
-- Frequência de Relatórios e Meets com Líderes:
-      - Relatórios Quinzenais: Cada grupo deve enviar um relatório quinzenalmente, detalhando o progresso, dificuldades e planos para a próxima semana.
+BACK END:
+1. Baixem (ou clonem) a api do nosso projeto (para clonar: git clone tps://github.com/lucas-brum545/littera-api)
+2. Abram o programa Docker Desktop
+3. Abram um terminal na pasta da api
+4. Executem o seguinte comando 'docker compose up --build'
+5. Se der tudo certo, sigam para o front end abaixo!
 
-- Meetings com Líderes: Uma vez a cada duas semanas.
-
-Sugestões para Gerenciar os grupos maiores    
-
-- Escolha de Líderes e Sub-Líderes: Além de um líder principal, nomear sub-líderes para áreas específicas (por exemplo, desenvolvimento, design, testes) pode ajudar vocês a manter a organização e a comunicação.
-
-- Uso de Ferramentas de Colaboração: Utilizar ferramentas como Trello, Slack, Notion ou Microsoft Teams para facilitar a comunicação e a gestão de tarefas.
-
-- Reuniões Regulares: Manter reuniões regulares (por exemplo, uma/duas vezes por semana) para acompanhar o progresso e resolver problemas.
-
+FRONT END:
+1. Baixem (ou clonem) o projeto em uma pasta (para clonar: git clone https://github.com/lucas-brum545/littera)
+2. Abram o VS code
+3. Selecionem a pasta do projeto
+4. Rodem 'npm run dev' na pasta
+5. Acessem o link http://localhost:5173/
+6. Aparecerá a tela de login, insiram as seguintes credenciais:
+   Usuário: admin@littera.com
+   Senha: 12345678
+7. Testem o projeto e me mandem o que acharem relevante
