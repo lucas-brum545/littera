@@ -1,0 +1,19 @@
+.date-picker-wrapper {
+  width: 100%;
+}
+
+.input-datepicker-mui {
+  width: 100%;
+  padding: 16.5px 14px;
+  border: 1px solid rgba(0, 0, 0, 0.23);
+  border-radius: 4px;
+  font-size: 1rem;
+  outline: none;
+  font-family: inherit;
+}
+
+.input-datepicker-mui:focus {
+  border-color: #1976d2;
+  border-width: 2px;
+  padding: 15.5px 13px;
+}
