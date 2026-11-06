@@ -11,6 +11,24 @@ Currently, two official plugins are available:
 
 The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
 
-## Expanding the ESLint configuration
+Karoline Zimmer de Oliveira 
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+PROS INTEGRANTES DO PROJETO, COMO COMPILAR E EXECUTAR:
+
+BACK END:
+1. Baixem (ou clonem) a api do nosso projeto (para clonar: git clone tps://github.com/lucas-brum545/littera-api)
+2. Abram o programa Docker Desktop
+3. Abram um terminal na pasta da api
+4. Executem o seguinte comando 'docker compose up --build'
+5. Se der tudo certo, sigam para o front end abaixo!
+
+FRONT END:
+1. Baixem (ou clonem) o projeto em uma pasta (para clonar: git clone https://github.com/lucas-brum545/littera)
+2. Abram o VS code
+3. Selecionem a pasta do projeto
+4. Rodem 'npm run dev' na pasta
+5. Acessem o link http://localhost:5173/
+6. Aparecerá a tela de login, insiram as seguintes credenciais:
+   Usuário: admin@littera.com
+   Senha: 12345678
+7. Testem o projeto e me mandem o que acharem relevante
