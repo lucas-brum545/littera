@@ -158,7 +158,7 @@ const Login = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                 />
-                <FaUser className="icon" />
+                {/* <FaUser className="icon" /> */}
               </div>
 
               <div className="input-field">
@@ -169,7 +169,7 @@ const Login = () => {
                   value={senha}
                   onChange={(e) => setSenha(e.target.value)}
                 />
-                <FaLock className="icon" />
+                {/* <FaLock className="icon" /> */}
               </div>
 
               {/* <div className="recall-forget">
