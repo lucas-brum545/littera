@@ -11,7 +11,18 @@ Currently, two official plugins are available:
 
 The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
 
-Karoline Zimmer de Oliveira 
+PROJETO FINAL CURSO DEV FULL STACK +PRA TI
+Lucas Brum - T1
+
+Luiz Lobato - T2
+
+Enzo Ornelas - T1
+
+Joyce Cruz - T2
+
+Milton Martins - T1
+
+Karoline Oliveira - T1
 
 PROS INTEGRANTES DO PROJETO, COMO COMPILAR E EXECUTAR:
 
