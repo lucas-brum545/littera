@@ -1,0 +1,7 @@
+{
+  "rewrites": [
+    { "source": "/api/open-library/:path*", "destination": "https://openlibrary.org/:path*" },
+    { "source": "/api/:path*", "destination": "https://seu-app.onrender.com/api/:path*" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}
