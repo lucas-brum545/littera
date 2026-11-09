@@ -151,6 +151,7 @@ const Login = () => {
               <h1>Acesse o sistema</h1>
 
               <div className="input-field">
+                {/* <FaUser className="icon" /> */}
                 <input
                   type="text"
                   placeholder="E-mail"
@@ -158,10 +159,10 @@ const Login = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                 />
-                <FaUser className="icon" />
               </div>
 
               <div className="input-field">
+                {/* <FaLock className="icon" /> */}
                 <input
                   type="password"
                   placeholder="Senha"
@@ -169,7 +170,6 @@ const Login = () => {
                   value={senha}
                   onChange={(e) => setSenha(e.target.value)}
                 />
-                <FaLock className="icon" />
               </div>
 
               {/* <div className="recall-forget">
