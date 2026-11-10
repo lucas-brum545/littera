@@ -43,7 +43,7 @@ function GerenciamentoUsuarios() {
     if (!termo) return usuarios
 
     return usuarios.filter((u) =>
-      [u.id, u.nome, u.tipoUsuario].some((campo) =>
+      [u.id, u.nome, u.email, u.telefone, u.tipoUsuario].some((campo) =>
         normalizar(campo).includes(termo)
       )
     )
@@ -87,12 +87,13 @@ function GerenciamentoUsuarios() {
       await fetchUsuarios();
       setExibirDialog(false);
       setUsuarioParaEditar(null);
-      setFeedback({ mensagem: 'Usuário salvo com sucesso!', tipo: 'success' })
+      setFeedback({ mensagem: 'Usuário salvo com sucesso!', tipo: 'success' });
+      setOpen(true);
 
     } catch (error) {
       console.error('Detalhes do erro ao salvar usuário:', error);
-      const mensagemErro = error.response.data.message || 'Erro ao salvar usuário.';
-      alert(mensagemErro)
+      const mensagemErro = error.response?.data?.erro || error.response?.data?.message || 'Erro ao salvar usuário.';
+      alert(mensagemErro);
     }
   }
 
@@ -104,10 +105,12 @@ function GerenciamentoUsuarios() {
         await excluirUsuarioApi(id)
         setUsuarios(usuarios.filter((usuario) => usuario.id !== id))
         setFeedback({ mensagem: 'Usuário excluído com sucesso!', tipo: 'success' })
+        setOpen(true)
       } catch (error) {
         console.error('Erro ao excluir usuário:', error)
-        const mensagemErro = error.response.data.message || 'Erro ao excluir usuário.';
+        const mensagemErro = error.response?.data?.erro || error.response?.data?.message || 'Erro ao excluir usuário.';
         setFeedback({ mensagem: mensagemErro, tipo: 'error' })
+        setOpen(true)
       }
     }
   }
@@ -116,10 +119,10 @@ function GerenciamentoUsuarios() {
     <div className="content-wrap">
       {feedback.mensagem && (
         <Snackbar open={open} autoHideDuration={4000} onClose={handleClose}>
-        <Alert onClose={handleClose} severity="success" variant="filled" sx={{ width: '100%' }}>
-          {feedback.mensagem}
-        </Alert>
-      </Snackbar>
+          <Alert onClose={handleClose} severity={feedback.tipo || "success"} variant="filled" sx={{ width: '100%' }}>
+            {feedback.mensagem}
+          </Alert>
+        </Snackbar>
       )}
       <div className="gerenciamento-usuarios">
         <div className="cabecalho-usuarios">
@@ -149,7 +152,7 @@ function GerenciamentoUsuarios() {
         <div className="barra-pesquisa">
           <input
             type="text"
-            placeholder="Pesquisar usuário pelo nome ou tipo de usuário"
+            placeholder="Pesquisar usuário por nome, e-mail, telefone ou tipo de usuário"
             value={pesquisa}
             onChange={(e) => setPesquisa(e.target.value)}
           />
@@ -198,7 +201,7 @@ function GerenciamentoUsuarios() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan="8" className="nenhum-usuario">
+                  <td colSpan="10" className="nenhum-usuario">
                     Nenhum usuário encontrado.
                   </td>
                 </tr>
