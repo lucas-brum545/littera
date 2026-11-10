@@ -221,3 +221,12 @@ export async function excluirReservaApi(id){
 }
 
 export default api;
+
+// --- TRADUÇÃO (feita pelo backend; exige login de ADMIN) ---
+export async function traduzirParaPortugues(texto) {
+    const { data } = await api.post('/api/traducao/portugues', { texto });
+    if (!data?.sucesso || !data?.traducao?.trim()) {
+        throw new Error('Não foi possível traduzir o texto.');
+    }
+    return data.traducao.trim();
+}

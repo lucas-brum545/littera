@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Dialog, DialogContent, DialogTitle, Stack, DialogActions, Button, TextField, MenuItem } from "@mui/material";
 import { buscarLivroPorIsbn, buscarRevistaPorIssn, formatarIssn } from "../../services/buscaExterna";
+import { traduzirParaPortugues } from "../../services/api";
 
 const TAMANHO_MAXIMO_IMAGEM = 5 * 1024 * 1024;
 
@@ -83,6 +84,7 @@ export default function DialogAcervo(props) {
     });
 
     const [carregando, setCarregando] = useState(false);
+    const [traduzindo, setTraduzindo] = useState(false);
     const [salvandoImagem, setSalvandoImagem] = useState(false);
     const [scannerAberto, setScannerAberto] = useState(false);
     const [mensagemScanner, setMensagemScanner] = useState("");
@@ -237,6 +239,27 @@ export default function DialogAcervo(props) {
             alert("Não foi possível buscar os dados automaticamente.\n\n" + erro.message);
         } finally {
             setCarregando(false);
+        }
+    }
+
+    // Traduz a descrição pelo backend, que guarda a chave do serviço de tradução.
+    // Só roda quando o usuário clica (não gasta cota sem necessidade) e exige login de ADMIN.
+    async function traduzirDescricao() {
+        const original = formDataItem.descricao;
+        if (!original?.trim()) return;
+
+        setTraduzindo(true);
+        try {
+            const traducao = await traduzirParaPortugues(original);
+            // Só aplica se o texto não foi editado enquanto a tradução estava em andamento
+            setFormDataItem((atual) =>
+                atual.descricao === original ? { ...atual, descricao: traducao } : atual
+            );
+        } catch (erro) {
+            console.error("Erro ao traduzir descrição:", erro);
+            alert("Não foi possível traduzir a descrição.\n\n" + (erro.message || ""));
+        } finally {
+            setTraduzindo(false);
         }
     }
 
@@ -483,6 +506,15 @@ export default function DialogAcervo(props) {
                             <label style={{ fontSize: "14px", fontWeight: "bold", color: "#555" }}>
                                 {ehLivro ? "Descrição/sinopse do livro:" : "Descrição da revista:"}
                             </label>
+                            <Button
+                                type="button"
+                                size="small"
+                                onClick={traduzirDescricao}
+                                disabled={traduzindo || !formDataItem.descricao?.trim()}
+                                sx={{ ml: 1 }}
+                            >
+                                {traduzindo ? "Traduzindo..." : "Traduzir para português"}
+                            </Button>
                             <textarea
                                 name="descricao"
                                 value={formDataItem.descricao}
