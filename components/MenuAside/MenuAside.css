@@ -59,7 +59,7 @@ body {
     margin: 20px auto;
     width: 160px;
     height: 60px;
-    background-image: url('../assets/Littera-logo.png');
+    background-image: url('../../assets/Littera-logo.png');
     color: #334155;
     background-size: contain;
     background-repeat: no-repeat;
