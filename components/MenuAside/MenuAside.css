@@ -6,6 +6,16 @@
     font-family: 'Montserrat', sans-serif;
 }
 
+html,
+body {
+    width: 100%;
+    max-width: 100%;
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+}
+
 body {
     /* Caminho da sua imagem */
     background-image: url(../../assets/bg2.jpg);
@@ -22,18 +32,25 @@ body {
     /* GARANTE QUE A IMAGEM ROLA COM A PÁGINA (comportamento padrão) */
     background-attachment: fixed;
 
-    /* Ocupa a largura da janela e permite crescer conforme o conteúdo da página */
-    width: 100vw;
-    min-height: 100vh;
-    margin: 0;
     color: #ffffff;
+}
+
+#root {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
 }
 
 /* Layout Geral do Painel (Menu fixo à esquerda + Conteúdo à direita) */
 .admin-layout-container {
-  display: flex;
-  min-height: 100vh;
-  width: 100%;
+    display: flex;
+    flex: 1;
+    min-height: 0;
+    width: 100%;
+    max-width: 100%;
 }
 
 /* Menu Aside Lateral */
@@ -48,18 +65,19 @@ body {
     top: 0;
     left: 0;
     box-shadow: 4px 0 10px rgba(0, 0, 0, 0.2);
-    padding-top: 30px;
+    padding-top: 24px;
     z-index: 10;
     font-size: 18px;
     letter-spacing: 0.5px;
-    
+    overflow-x: hidden;
 }
 
 .sidebar-logo {
-    margin: 20px auto;
+    margin: 12px auto 20px auto;
     width: 160px;
     height: 60px;
-    background-image: url('../assets/Littera-logo.png');
+    flex-shrink: 0;
+    background-image: url('../../assets/Littera-logo.png');
     color: #334155;
     background-size: contain;
     background-repeat: no-repeat;
@@ -68,24 +86,48 @@ body {
 
 .sidebar-nav {
     flex: 1;
-    padding: 20px 0;
+    display: flex;
+    flex-direction: column;
+    padding: 12px 0;
     overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.sidebar-nav > ul {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
 }
 
 .sidebar-nav ul {
     list-style: none;
     font-weight: bold;
     font-size: 20px;
+    margin: 0;
+    padding: 0;
+}
+
+.sidebar-nav li {
+    width: 100%;
 }
 
 .sidebar-nav a {
-    display: block;
+    display: flex;
+    align-items: center;
     padding: 12px 20px;
     background-color: #ffffff;
     color: #334155;
     text-decoration: none;
-    transition: all 0.3s ease;
+    transition: all 0.25s ease;
     font-size: 18px;
+    line-height: 1.2;
+    width: 100%;
+}
+
+.sidebar-nav a svg {
+    flex-shrink: 0;
+    box-sizing: content-box;
+    display: block;
 }
 
 .sidebar-nav a:hover {
@@ -97,53 +139,32 @@ body {
 /* Submenu */
 .has-submenu > a::after {
     font-size: 0.7rem;
-    float: right;
+    margin-left: auto;
     line-height: 1.5;
 }
 
 .submenu {
-    height: 300px;
-    max-height: 0;
+    max-height: 260px;
     overflow: hidden;
     transition: max-height 0.3s ease-out;
 }
 
-.has-submenu:hover .submenu {
-    max-height: 218px; 
-}
-
-/* Submenu */
-.has-submenu > a::after {
-    font-size: 0.7rem;
-    float: right;
-    line-height: 1.5;
-}
-
-.submenu {
-    height: 300px;
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height 0.3s ease-out;
-}
-
-.has-submenu:hover .submenu {
-    max-height: 218px; 
-}
-
-/* --- ALTERAÇÕES AQUI --- */
 .submenu li a {
     font-size: 16px;
-    padding-left: 38px; /* Adiciona o recuo para mover o texto mais para a direita */
+    padding-left: 32px;
 }
 
 .submenu li a:hover {
     color: #ffffff;
-    padding-left: 43px; /* Mantém o recuo e faz um suave deslocamento ao passar o mouse */
+    padding-left: 37px;
 }
 
-/* Botão Sair na parte inferior */
+/* Botão Sair fixado na parte inferior */
 .logout {
-    padding-bottom: 30px;
+    margin-top: auto;
+    padding-top: 8px;
+    padding-bottom: 16px;
+    border-top: 1px solid #f1f5f9;
 }
 
 .logout a {
@@ -151,84 +172,212 @@ body {
 }
 
 .logout a:hover {
-    background-color: #7f1d1d;
+    background-color: #991b1b;
     color: #ffffff;
 }
 
-/* Área de Conteúdo Principal com Flexbox para o Sticky Footer */
+/* Área de Conteúdo Principal */
 .admin-main-content {
-  margin-left: 220px; /* Compensa a largura da sidebar fixa */
-  flex: 1;
-  min-height: 130vh;
-  padding: 150px;
+    margin-left: 220px; /* Compensa a largura da sidebar fixa */
+    flex: 1;
+    min-width: 0;
+    width: calc(100% - 220px);
+    max-width: calc(100% - 220px);
+    padding: 24px 18px;
+    overflow-x: hidden;
 }
 
 /* Container interno que empurra o rodapé para o fim da tela */
 .content-body {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
 
 .admin-title {
-  margin-top: 8px;
-  font-size: 2.5rem;
-  font-weight: bold;
-  margin-top: 30px;
-  margin-bottom: 10px;
+    font-size: clamp(1.75rem, 3vw, 2.5rem);
+    font-weight: bold;
+    margin-top: 24px;
+    margin-bottom: 10px;
 }
 
 .admin-subtitle {
-  display: flex;
-  justify-content: flex-start;
-  font-size: 1.1rem;
-  color: #94a3b8;
-  width: 500px;
-  padding-left: 0 !important;
+    display: flex;
+    justify-content: flex-start;
+    font-size: 1.1rem;
+    color: #cbd5e1;
+    width: 100%;
+    max-width: 500px;
+    padding-left: 0 !important;
+    padding-bottom: 0 !important;
 }
 
 /* Estilização do Rodapé Fixo na Base */
 .footer {
-  width: 100%;
-  text-align: center;
-  padding: 20px 0;
-  color: #64748b;
-  font-size: 0.85rem;
-  margin-top: auto;
+    width: 100%;
+    text-align: center;
+    padding: 20px 0;
+    color: #64748b;
+    font-size: 0.85rem;
+    margin-top: auto;
 }
 
-.icon{
-    color:#334155;
+.icon {
+    color: #334155;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    vertical-align: middle;
 }
 
-.icon:hover{
-    color:#ffffff;
-}
-
-
-.icon-logout{
-    color: #7f1d1d;
-    padding-right: 7px;
-}
-
-.icon-logout a:hover{
+.icon:hover {
     color: #ffffff;
 }
 
-.icon-panel{
+.icon-logout {
+    color: #7f1d1d;
+    padding-right: 7px;
+    display: inline-flex;
+    align-items: center;
+}
+
+.icon-logout a:hover {
+    color: #ffffff;
+}
+
+.icon-panel {
     color: #334155;
     width: 25px;
     height: 25px;
     padding-right: 7px;
+    display: inline-flex;
+    align-items: center;
 }
 
-.cabecalho-sessao{
-    font-size: 26px;
-    color: gray;
-    font-weight: bold;
-    padding: 3px;
-    background-color: #ffffff;
-    border-radius: 5px;
+.cabecalho-sessao {
+    display: inline-block;
+    font-size: clamp(1.1rem, 2vw, 1.5rem);
+    color: #1e293b;
+    font-weight: 700;
+    padding: 8px 16px;
+    background-color: rgba(255, 255, 255, 0.95);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
+}
+
+/* Ajustes para modais do MUI não gerarem rolagem desnecessária */
+.MuiDialog-paper {
+    height: auto !important;
+    max-height: 90vh !important;
+    overflow-x: hidden !important;
+}
+
+.MuiDialogContent-root {
+    overflow-x: hidden !important;
+}
+
+.MuiDialogContent-root input[type="file"] {
+    max-width: 100%;
+}
+
+/* Responsividade */
+@media (max-width: 1024px) {
+    .admin-main-content {
+        padding: 28px 20px;
+    }
+}
+
+@media (max-width: 768px) {
+    .admin-layout-container {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        position: relative;
+        width: 100%;
+        height: auto;
+        padding-top: 12px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .sidebar-logo {
+        margin: 8px auto 12px auto;
+        width: 140px;
+        height: 48px;
+    }
+
+    .sidebar-nav {
+        padding: 4px 8px 12px 8px;
+        overflow: visible;
+    }
+
+    .sidebar-nav > ul {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .sidebar-nav a {
+        justify-content: center;
+        padding: 10px 16px;
+        border-radius: 6px;
+        font-size: 16px;
+    }
+
+    .sidebar-nav a:hover {
+        padding-left: 16px;
+    }
+
+    .submenu {
+        max-height: none;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 6px;
+        padding: 6px 4px;
+        background-color: #f8fafc;
+        border-radius: 6px;
+    }
+
+    .submenu li {
+        width: auto;
+    }
+
+    .submenu li a {
+        padding: 8px 14px;
+        font-size: 15px;
+        border-radius: 6px;
+        justify-content: center;
+    }
+
+    .submenu li a:hover {
+        padding-left: 14px;
+    }
+
+    .logout {
+        padding-bottom: 4px;
+    }
+
+    .admin-main-content {
+        margin-left: 0;
+        width: 100%;
+        max-width: 100%;
+        padding: 24px 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .submenu {
+        flex-direction: column;
+    }
+
+    .submenu li {
+        width: 100%;
+    }
+
+    .admin-main-content {
+        padding: 20px 12px;
+    }
 }
