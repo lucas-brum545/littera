@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Dialog, DialogContent, DialogTitle, Stack, DialogActions, Button, TextField, MenuItem } from "@mui/material";
+import { buscarLivroPorIsbn, buscarRevistaPorIssn, formatarIssn } from "../../services/buscaExterna";
 
 const TAMANHO_MAXIMO_IMAGEM = 5 * 1024 * 1024;
 
@@ -44,6 +45,7 @@ function validarISSN(valor) {
   return calcularDigitoISSN(issn.slice(0, 7)) === issn[7];
 }
 
+// Código de barras de revista (EAN-13 começando com 977) -> ISSN
 function converterCodigoRevista(codigo) {
   const identificador = limparIdentificador(codigo);
   if (identificador.length === 13 && identificador.startsWith("977")) {
@@ -53,10 +55,16 @@ function converterCodigoRevista(codigo) {
   return identificador;
 }
 
+// Máscara MM/aaaa: o backend exige exatamente esse formato (coluna de 7 caracteres)
+function mascararMesAno(valor) {
+  const digitos = String(valor || "").replace(/\D/g, "").slice(0, 6);
+  return digitos.length > 2 ? `${digitos.slice(0, 2)}/${digitos.slice(2)}` : digitos;
+}
+
 export default function DialogAcervo(props) {
     const item = props.acervoParaEditar;
-    
-    // Estado unificado do formulário para suportar a busca externa e scanner
+
+    // Estado unificado do formulário para suportar a busca externa e o scanner
     const [formDataItem, setFormDataItem] = useState({
         titulo: item?.titulo || '',
         ano: item?.ano || '',
@@ -78,17 +86,22 @@ export default function DialogAcervo(props) {
     const [salvandoImagem, setSalvandoImagem] = useState(false);
     const [scannerAberto, setScannerAberto] = useState(false);
     const [mensagemScanner, setMensagemScanner] = useState("");
-    
+
     const videoRef = useRef(null);
     const controlesScannerRef = useRef(null);
     const scannerAtivoRef = useRef(false);
     const itemRef = useRef(formDataItem);
 
+    const ehLivro = formDataItem.tipo === "LIVRO";
+    const valorIdentificador = ehLivro ? formDataItem.isbn : formDataItem.issn;
+    const identificadorInvalido = !!valorIdentificador.trim() &&
+        !(ehLivro ? validarISBN(valorIdentificador) : validarISSN(valorIdentificador));
+
     useEffect(() => {
         itemRef.current = formDataItem;
     }, [formDataItem]);
 
-    // Rotina do Scanner de Código de Barras (vindo do código do Luiz)
+    // Rotina do scanner de código de barras
     useEffect(() => {
         if (!scannerAberto) return;
         let cancelado = false;
@@ -119,15 +132,14 @@ export default function DialogAcervo(props) {
                     if (!resultado || scannerAtivoRef.current) return;
                     scannerAtivoRef.current = true;
 
-                    const codigoLido = resultado.getText();
-                    const valorLimpo = limparIdentificador(codigoLido);
+                    const valorLimpo = limparIdentificador(resultado.getText());
                     const ehRevista = itemRef.current.tipo === "REVISTA";
 
-                    setFormDataItem((atual) => ({
-                        ...atual,
-                        isbn: ehRevista ? converterCodigoRevista(valorLimpo) : valorLimpo,
-                        issn: ehRevista ? valorLimpo : atual.issn
-                    }));
+                    // Livro: o código lido é o ISBN. Revista: converte o código de barras em ISSN.
+                    // (Antes os dois campos eram trocados: a revista gravava o ISSN no campo ISBN.)
+                    setFormDataItem((atual) => ehRevista
+                        ? { ...atual, issn: formatarIssn(converterCodigoRevista(valorLimpo)) }
+                        : { ...atual, isbn: valorLimpo });
 
                     setScannerAberto(false);
                     setMensagemScanner("");
@@ -140,7 +152,7 @@ export default function DialogAcervo(props) {
                 controlesScannerRef.current = controles;
             } catch (erro) {
                 console.error("Erro ao iniciar câmera:", erro);
-                if (!cancelado) setMensagemScanner("Não foi possível abrir a câmera. Verifique permissões.");
+                if (!cancelado) setMensagemScanner("Não foi possível abrir a câmera. Verifique as permissões.");
             }
         }
 
@@ -154,7 +166,7 @@ export default function DialogAcervo(props) {
         };
     }, [scannerAberto]);
 
-    // Manipulação de Imagem / Capa com limite de 5MB
+    // Capa: lê a imagem escolhida (limite de 5 MB)
     function selecionarImagem(event) {
         const arquivo = event.target.files?.[0];
         event.target.value = "";
@@ -182,55 +194,34 @@ export default function DialogAcervo(props) {
         leitor.readAsDataURL(arquivo);
     }
 
-    // Tradução de descrição em segundo plano
-    async function traduzirDescricaoEmSegundoPlano(textoOriginal) {
-        if (!textoOriginal?.trim()) return;
-        try {
-            const resposta = await fetch("/api/traducao/portugues", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ texto: textoOriginal }),
-            });
-            if (!resposta.ok) return;
-            const resultado = await resposta.json();
-            const traducao = resultado.traducao?.trim();
-            if (!resultado.sucesso || !traducao) return;
-
-            setFormDataItem((atual) => {
-                if (!atual.descricao?.trim() || atual.descricao === textoOriginal) {
-                    return { ...atual, descricao: traducao };
-                }
-                return atual;
-            });
-        } catch (erro) {
-            console.error("Erro ao traduzir descrição:", erro);
-        }
-    }
-
-    // Integração de busca automática com Open Library / Periódicos
+    // Preenche o formulário com dados do Open Library (livros) ou da Crossref (revistas).
+    // As rotas /api/open-library, /api/periodicos e /api/traducao só existiam no servidor
+    // de desenvolvimento; em produção as consultas vão direto aos serviços públicos.
     async function buscarDadosExternos() {
-        const tipo = formDataItem.tipo;
-        const identificador = limparIdentificador(tipo === "LIVRO" ? formDataItem.isbn : formDataItem.issn);
+        const identificador = limparIdentificador(valorIdentificador);
 
         if (!identificador) {
-            alert(tipo === "LIVRO" ? "Informe o ISBN." : "Informe o ISSN.");
+            alert(ehLivro ? "Informe o ISBN." : "Informe o ISSN.");
+            return;
+        }
+        if (identificadorInvalido) {
+            alert(ehLivro
+                ? "O ISBN parece inválido. Confira os dígitos."
+                : "O ISSN parece inválido. Confira os dígitos.");
             return;
         }
 
         setCarregando(true);
         try {
-            const endpoint = tipo === "LIVRO"
-                ? `/api/open-library/isbn/${encodeURIComponent(identificador)}`
-                : `/api/periodicos/issn/${encodeURIComponent(identificador)}`;
+            const dados = ehLivro
+                ? await buscarLivroPorIsbn(identificador)
+                : await buscarRevistaPorIssn(identificador);
 
-            const resposta = await fetch(endpoint);
-            const resultado = await resposta.json();
-
-            if (!resposta.ok || !resultado.sucesso || !resultado.dados) {
-                throw new Error(resultado.erro || resultado.mensagem || "Não foi possível encontrar os dados.");
+            if (!dados) {
+                alert("Nenhum resultado encontrado para esse código. Preencha os dados manualmente.");
+                return;
             }
 
-            const dados = resultado.dados;
             setFormDataItem((atual) => ({
                 ...atual,
                 titulo: dados.titulo || atual.titulo,
@@ -238,13 +229,7 @@ export default function DialogAcervo(props) {
                 ano: dados.ano || atual.ano,
                 genero: dados.genero || atual.genero,
                 capa: atual.capa || dados.capa || "",
-                descricao: atual.descricao || dados.descricaoOriginal || dados.descricao || "",
-                idioma: dados.idioma || atual.idioma,
             }));
-
-            if (tipo === "LIVRO" && !formDataItem.descricao?.trim() && dados.descricaoOriginal?.trim()) {
-                traduzirDescricaoEmSegundoPlano(dados.descricaoOriginal);
-            }
         } catch (erro) {
             console.error("Erro ao buscar dados:", erro);
             alert("Não foi possível buscar os dados automaticamente.\n\n" + erro.message);
@@ -255,33 +240,42 @@ export default function DialogAcervo(props) {
 
     function handleChange(e) {
         const { name, value } = e.target;
-        setFormDataItem((atual) => ({ ...atual, [name]: value }));
+        setFormDataItem((atual) => ({
+            ...atual,
+            [name]: name === "mesAnoPublicacao" ? mascararMesAno(value) : value,
+        }));
     }
 
-    function limparCampos(){
-        const itemLimpo = {
-        titulo: '',
-        ano: '',
-        tipo: 'LIVRO',
-        localizacao: '',
-        idioma: '',
-        totalDisponivel: 1,
-        autor: '',
-        isbn: '',
-        genero: '',
-        edicao: '',
-        issn: '',
-        mesAnoPublicacao: '',
-        capa: '',
-        descricao: ''
-    }
-        setFormDataItem(itemLimpo)
+    function limparCampos() {
+        // Mantém o tipo atual: ao editar, o tipo não pode mudar (o backend recusa)
+        setFormDataItem((atual) => ({
+            titulo: '',
+            ano: '',
+            tipo: atual.tipo,
+            localizacao: '',
+            idioma: '',
+            totalDisponivel: 1,
+            autor: '',
+            isbn: '',
+            genero: '',
+            edicao: '',
+            issn: '',
+            mesAnoPublicacao: '',
+            capa: '',
+            descricao: '',
+        }));
     }
 
     function enviar(event) {
         event.preventDefault();
-        
-        // Formato exato esperado pelo nosso back-end Java
+
+        // ISBN/ISSN fora do padrão é só um aviso: livros antigos podem não ter código válido
+        if (identificadorInvalido) {
+            const rotulo = ehLivro ? "ISBN" : "ISSN";
+            if (!window.confirm(`O ${rotulo} parece inválido. Salvar mesmo assim?`)) return;
+        }
+
+        // Formato exato esperado pelo backend Java (ItemAcervoRequest)
         const dadosFormatados = {
             titulo: formDataItem.titulo,
             ano: formDataItem.ano ? Number(formDataItem.ano) : null,
@@ -291,16 +285,16 @@ export default function DialogAcervo(props) {
             totalDisponivel: Number(formDataItem.totalDisponivel || 1),
             capa: formDataItem.capa || null,
             descricao: formDataItem.descricao || null,
-            
+
             // Atributos específicos de Livro
-            autor: formDataItem.tipo === "LIVRO" ? formDataItem.autor : null,
-            isbn: formDataItem.tipo === "LIVRO" ? formDataItem.isbn : null,
-            genero: formDataItem.tipo === "LIVRO" ? formDataItem.genero : null,
+            autor: ehLivro ? formDataItem.autor : null,
+            isbn: ehLivro ? formDataItem.isbn : null,
+            genero: ehLivro ? formDataItem.genero : null,
 
             // Atributos específicos de Revista
-            edicao: formDataItem.tipo === "REVISTA" ? formDataItem.edicao : null,
-            issn: formDataItem.tipo === "REVISTA" ? formDataItem.issn : null,
-            mesAnoPublicacao: formDataItem.tipo === "REVISTA" ? formDataItem.mesAnoPublicacao : null,
+            edicao: !ehLivro ? formDataItem.edicao : null,
+            issn: !ehLivro ? formDataItem.issn : null,
+            mesAnoPublicacao: !ehLivro ? formDataItem.mesAnoPublicacao : null,
         };
 
         props.onSalvar(dadosFormatados);
@@ -314,9 +308,8 @@ export default function DialogAcervo(props) {
             <DialogContent>
                 <form onSubmit={enviar}>
                     <Stack spacing={2} sx={{ mt: 2 }}>
-                        
 
-                        {/* Seletor do Tipo de Item */}
+                        {/* Tipo do item (travado na edição) */}
                         <TextField
                             select
                             label="Tipo de Item"
@@ -324,7 +317,7 @@ export default function DialogAcervo(props) {
                             value={formDataItem.tipo}
                             onChange={(e) => {
                                 const novoTipo = e.target.value;
-                                setFormDataItem(atual => ({ ...atual, tipo: novoTipo }));
+                                setFormDataItem((atual) => ({ ...atual, tipo: novoTipo }));
                             }}
                             required
                             variant="outlined"
@@ -335,131 +328,143 @@ export default function DialogAcervo(props) {
                             <MenuItem value="REVISTA">Revista</MenuItem>
                         </TextField>
 
-                        {/* Campo Identificador com suporte a scanner e busca externa */}
-                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                            <TextField 
-                                label={formDataItem.tipo === "LIVRO" ? "ISBN" : "ISSN"}
-                                name={formDataItem.tipo === "LIVRO" ? "isbn" : "issn"}
-                                value={formDataItem.tipo === "LIVRO" ? formDataItem.isbn : formDataItem.issn}
+                        {/* Identificador com scanner e busca externa */}
+                        <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
+                            <TextField
+                                label={ehLivro ? "ISBN" : "ISSN"}
+                                name={ehLivro ? "isbn" : "issn"}
+                                value={valorIdentificador}
                                 onChange={(e) => {
                                     const val = e.target.value;
-                                    setFormDataItem(atual => ({
-                                        ...atual,
-                                        [formDataItem.tipo === "LIVRO" ? "isbn" : "issn"]: val
-                                    }));
+                                    setFormDataItem((atual) => ({ ...atual, [ehLivro ? "isbn" : "issn"]: val }));
                                 }}
-                                required 
+                                error={identificadorInvalido}
+                                helperText={identificadorInvalido
+                                    ? (ehLivro ? "ISBN inválido: confira os dígitos" : "ISSN inválido: confira os dígitos")
+                                    : " "}
+                                required
                                 fullWidth
-                                variant="outlined" 
-                                sx={{ background: 'white' }} 
+                                variant="outlined"
+                                sx={{ background: 'white' }}
                             />
-                            <Button variant="outlined" onClick={() => setScannerAberto(true)} type="button">
+                            <Button variant="outlined" onClick={() => setScannerAberto(true)} type="button" sx={{ mt: 1 }}>
                                 Câmera
                             </Button>
-                            <Button variant="contained" onClick={buscarDadosExternos} disabled={carregando} type="button">
-                                {carregando ? "Buscando..." : "Buscar API"}
+                            <Button variant="contained" onClick={buscarDadosExternos} disabled={carregando} type="button" sx={{ mt: 1 }}>
+                                {carregando ? "Buscando..." : "Buscar"}
                             </Button>
                         </div>
 
-                        <TextField 
-                            label="Título" 
-                            name="titulo" 
+                        <TextField
+                            label="Título"
+                            name="titulo"
                             value={formDataItem.titulo}
                             onChange={handleChange}
-                            required 
-                            variant="outlined" 
-                            sx={{ background: 'white' }} 
+                            required
+                            variant="outlined"
+                            sx={{ background: 'white' }}
                         />
 
-                        <TextField 
-                            label="Ano" 
-                            name="ano" 
-                            type="number" 
+                        <TextField
+                            label="Ano"
+                            name="ano"
+                            type="number"
                             value={formDataItem.ano}
                             onChange={handleChange}
-                            required 
-                            variant="outlined" 
-                            sx={{ background: 'white' }} 
+                            required
+                            variant="outlined"
+                            sx={{ background: 'white' }}
                         />
 
-                        <TextField 
-                            label="Localização" 
-                            name="localizacao" 
+                        <TextField
+                            label="Localização"
+                            name="localizacao"
                             value={formDataItem.localizacao}
                             onChange={handleChange}
-                            required 
-                            variant="outlined" 
-                            sx={{ background: 'white' }} 
+                            required
+                            variant="outlined"
+                            sx={{ background: 'white' }}
                         />
 
-                        <TextField 
-                            label="Idioma" 
-                            name="idioma" 
+                        <TextField
+                            label="Idioma"
+                            name="idioma"
                             value={formDataItem.idioma}
                             onChange={handleChange}
-                            variant="outlined" 
-                            sx={{ background: 'white' }} 
+                            variant="outlined"
+                            sx={{ background: 'white' }}
                         />
 
-                        <TextField 
-                            label="Total Disponível" 
-                            name="totalDisponivel" 
-                            type="number" 
+                        <TextField
+                            label="Total Disponível"
+                            name="totalDisponivel"
+                            type="number"
                             value={formDataItem.totalDisponivel}
                             onChange={handleChange}
-                            variant="outlined" 
-                            sx={{ background: 'white' }} 
+                            variant="outlined"
+                            sx={{ background: 'white' }}
+                            slotProps={{ htmlInput: { min: 0 } }}
                         />
 
-                        {/* Campos dinâmicos se for LIVRO */}
-                        {formDataItem.tipo === "LIVRO" && (
+                        {/* Campos de LIVRO */}
+                        {ehLivro && (
                             <>
-                                <TextField 
-                                    label="Autor" 
-                                    name="autor" 
+                                <TextField
+                                    label="Autor"
+                                    name="autor"
                                     value={formDataItem.autor}
                                     onChange={handleChange}
-                                    required 
-                                    variant="outlined" 
-                                    sx={{ background: 'white' }} 
+                                    required
+                                    variant="outlined"
+                                    sx={{ background: 'white' }}
                                 />
-                                <TextField 
-                                    label="Gênero" 
-                                    name="genero" 
+                                <TextField
+                                    label="Gênero"
+                                    name="genero"
                                     value={formDataItem.genero}
                                     onChange={handleChange}
-                                    required 
-                                    variant="outlined" 
-                                    sx={{ background: 'white' }} 
+                                    required
+                                    variant="outlined"
+                                    sx={{ background: 'white' }}
                                 />
                             </>
                         )}
 
-                        {/* Campos dinâmicos se for REVISTA */}
-                        {formDataItem.tipo === "REVISTA" && (
+                        {/* Campos de REVISTA */}
+                        {!ehLivro && (
                             <>
-                                <TextField 
-                                    label="Edição" 
-                                    name="edicao" 
+                                <TextField
+                                    label="Edição"
+                                    name="edicao"
                                     value={formDataItem.edicao}
                                     onChange={handleChange}
-                                    required 
-                                    variant="outlined" 
-                                    sx={{ background: 'white' }} 
+                                    required
+                                    variant="outlined"
+                                    sx={{ background: 'white' }}
                                 />
-                                <TextField 
-                                    label="Mês/Ano Publicação (ex: 10/2026)" 
-                                    name="mesAnoPublicacao" 
+                                <TextField
+                                    label="Mês/Ano Publicação"
+                                    name="mesAnoPublicacao"
+                                    placeholder="MM/aaaa"
+                                    helperText="Formato MM/aaaa, por exemplo 05/2024"
                                     value={formDataItem.mesAnoPublicacao}
                                     onChange={handleChange}
-                                    required 
-                                    variant="outlined" 
-                                    sx={{ background: 'white' }} 
+                                    required
+                                    variant="outlined"
+                                    sx={{ background: 'white' }}
+                                    slotProps={{
+                                        htmlInput: {
+                                            inputMode: 'numeric',
+                                            maxLength: 7,
+                                            pattern: '(0[1-9]|1[0-2])/[0-9]{4}',
+                                            title: 'Use o formato MM/aaaa (ex.: 05/2024)',
+                                        },
+                                    }}
                                 />
                             </>
                         )}
 
-                        {/* Gestão de Capa */}
+                        {/* Capa */}
                         <div style={{ border: "1px solid #ccc", padding: "10px", borderRadius: "8px" }}>
                             <h4>Capa do Item</h4>
                             {formDataItem.capa ? (
@@ -468,13 +473,13 @@ export default function DialogAcervo(props) {
                                 <p style={{ fontSize: "12px", color: "#666" }}>Nenhuma capa selecionada.</p>
                             )}
                             <input type="file" accept="image/*" onChange={selecionarImagem} />
-                            {salvandoImagem && <p style={{ fontSize: "12px" }}>A carregar imagem...</p>}
+                            {salvandoImagem && <p style={{ fontSize: "12px" }}>Carregando imagem...</p>}
                         </div>
 
-                        {/* Descrição / Sinopse */}
+                        {/* Descrição / sinopse */}
                         <div>
                             <label style={{ fontSize: "14px", fontWeight: "bold", color: "#555" }}>
-                                {formDataItem.tipo === "REVISTA" ? "Descrição da revista:" : "Descrição/sinopse do livro:"}
+                                {ehLivro ? "Descrição/sinopse do livro:" : "Descrição da revista:"}
                             </label>
                             <textarea
                                 name="descricao"
@@ -486,7 +491,7 @@ export default function DialogAcervo(props) {
                         </div>
 
                     </Stack>
-                    
+
                     <DialogActions sx={{ mt: 2 }}>
                         <Button type="button" onClick={limparCampos}>Limpar Campos</Button>
                         <Button type="button" onClick={() => props.onCancelar()} sx={{ fontWeight: 'bold', fontFamily: 'Arial' }}>
@@ -499,7 +504,7 @@ export default function DialogAcervo(props) {
                 </form>
             </DialogContent>
 
-            {/* Modal do Scanner de Câmera */}
+            {/* Modal do scanner de câmera */}
             {scannerAberto && (
                 <div style={{ position: "fixed", inset: 0, zIndex: 2000, backgroundColor: "rgba(0,0,0,0.8)", display: "flex", alignItems: "center", justifyContent: "center", padding: "16px" }}>
                     <div style={{ background: "#fff", padding: "20px", borderRadius: "12px", width: "100%", maxWidth: "500px", textAlign: "center" }}>

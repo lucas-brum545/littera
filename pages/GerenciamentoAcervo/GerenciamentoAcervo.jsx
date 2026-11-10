@@ -1,35 +1,27 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import DialogAcervo from '../../components/DialogAcervo/DialogAcervo'
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import { ImBooks } from 'react-icons/im';
 import './GerenciamentoAcervo.css';
 import { Alert, CircularProgress } from "@mui/material";
+import {
+  atualizarItemAcervo,
+  criarItemAcervo,
+  excluirItemAcervo,
+  listarItensAcervo,
+} from '../../services/api';
 
-function criarNovoItem() {
-  return {
-    tipo: "LIVRO",
-    titulo: "",
-    autor: "",
-    ano: "",
-    genero: "",
-    isbn: "",
-    edicao: "",
-    issn: "",
-    mesAnoPublicacao: "",
-    totalDisponivel: "",
-    totalEmprestados: "",
-    localizacao: "",
-    capa: "",
-    descricao: "",
-    idioma: "",
-  };
-}
+// Minúsculas e sem acentos, e não quebra com valores nulos
+const normalizar = (texto) =>
+  String(texto ?? '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
 
 function formatarDataHora(valor) {
   if (!valor) return "Não registrado";
 
-  // Se a string vier no formato YYYY-MM-DD (comum em datas vindas do SQL),
-  // podemos evitar o desvio de fuso gerando a data baseada em UTC:
+  // Datas no formato YYYY-MM-DD são lidas em UTC para não recuar um dia por causa do fuso
   let data;
   if (typeof valor === "string" && /^\d{4}-\d{2}-\d{2}$/.test(valor)) {
     const [ano, mes, dia] = valor.split("-").map(Number);
@@ -40,20 +32,17 @@ function formatarDataHora(valor) {
 
   if (Number.isNaN(data.getTime())) return "Data inválida";
 
-  // Usamos timeZone: 'UTC' para garantir que o dia exibido seja exatamente 
-  // o mesmo que está gravado na base de dados, sem o recuo de horário.
   return new Intl.DateTimeFormat("pt-BR", {
     dateStyle: "short",
     timeZone: "UTC",
   }).format(data);
 }
 
-function App() {
+function GerenciamentoAcervo() {
   const [itensAcervo, setItensAcervo] = useState([]);
   const [exibirDialog, setExibirDialog] = useState(false);
   const [itemParaEditar, setItemParaEditar] = useState(null);
   const [bancoCarregado, setBancoCarregado] = useState(false);
-  const [erroBanco, setErroBanco] = useState("");
   const [erro, setErro] = useState('');
   const [feedback, setFeedback] = useState({ mensagem: '', tipo: '' });
 
@@ -65,16 +54,18 @@ function App() {
     fetchItensAcervo();
   }, []);
 
+  // Some com a mensagem de feedback depois de 10 segundos.
+  // (Antes o setTimeout ficava solto no corpo do componente e era recriado a cada renderização.)
+  useEffect(() => {
+    if (!feedback.mensagem) return;
+    const temporizador = setTimeout(() => setFeedback({ mensagem: '', tipo: '' }), 10000);
+    return () => clearTimeout(temporizador);
+  }, [feedback]);
+
   async function fetchItensAcervo() {
     try {
-      setErroBanco("");
-      const resposta = await fetch("/api/acervo");
-
-      if (!resposta.ok) {
-        throw new Error(`Erro ao consultar o acervo: HTTP ${resposta.status}`);
-      }
-
-      const dados = await resposta.json();
+      setErro('');
+      const dados = await listarItensAcervo();
 
       const itens = dados.map((item) => ({
         ...item,
@@ -93,10 +84,9 @@ function App() {
       }));
 
       setItensAcervo(itens);
-    } catch (erro) {
-      console.error("Erro ao carregar acervo:", erro.response.data || erro.message || erro);
-      setErro('Erro ao carregar acervo.');
-      setErroBanco("Não foi possível carregar o acervo do servidor.");
+    } catch (error) {
+      console.error("Erro ao carregar acervo:", error);
+      setErro(error.message || 'Não foi possível carregar o acervo do servidor.');
     } finally {
       setBancoCarregado(true);
     }
@@ -106,32 +96,14 @@ function App() {
   const livrosFiltrados = itensAcervo
     .filter((item) => item.tipo === "LIVRO")
     .filter((livro) => {
-      const termo = pesquisaLivro.toLowerCase();
-      const titulo = (livro.titulo || "").toLowerCase();
-      const autor = (livro.autor || "").toLowerCase();
-      const genero = (livro.genero || "").toLowerCase();
-      const idioma = (livro.idioma || "").toLowerCase();
-
-      return (
-        titulo.includes(termo) ||
-        autor.includes(termo) ||
-        genero.includes(termo) ||
-        idioma.includes(termo)
-      );
+      const termo = normalizar(pesquisaLivro);
+      return [livro.titulo, livro.autor, livro.genero, livro.idioma]
+        .some((campo) => normalizar(campo).includes(termo));
     });
 
   const revistasFiltradas = itensAcervo
     .filter((item) => item.tipo === "REVISTA")
-    .filter((revista) => revista.titulo.toLowerCase().includes(pesquisaRevista.toLowerCase()));
-
-  if (!bancoCarregado) {
-    return (
-      <div className="content-wrap" style={{ padding: "24px", textAlign: "left" }}>
-        <CircularProgress sx={{display:'flex', justifyContent: 'center', color: 'primary'}} enableTrackSlot size="3rem" aria-label="Loading…" />
-        <p>Carregando acervo...</p>
-      </div>
-    );
-  }
+    .filter((revista) => normalizar(revista.titulo).includes(normalizar(pesquisaRevista)));
 
   function abrirEdicao(item) {
     setItemParaEditar(item);
@@ -140,62 +112,59 @@ function App() {
 
   async function salvarItemAcervo(dados) {
     try {
-      const url = itemParaEditar ? `/api/acervo/${itemParaEditar.codigo}` : "/api/acervo";
-      const metodo = itemParaEditar ? "PUT" : "POST";
-
-      const resposta = await fetch(url, {
-        method: metodo,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(dados),
-      });
-
-      if (!resposta.ok) {
-        const textoErro = await resposta.text();
-        let mensagem = "Erro ao salvar item no acervo.";
-        try {
-          const jsonErro = JSON.parse(textoErro);
-          mensagem = jsonErro.message || jsonErro.erro || mensagem;
-        } catch {
-          if (textoErro) mensagem = textoErro;
-        }
-        throw new Error(mensagem);
+      if (itemParaEditar) {
+        await atualizarItemAcervo(itemParaEditar.codigo, dados);
+      } else {
+        await criarItemAcervo(dados);
       }
 
       await fetchItensAcervo();
       setExibirDialog(false);
       setItemParaEditar(null);
       setFeedback({ mensagem: 'Item do acervo salvo com sucesso!', tipo: 'success' });
-
     } catch (error) {
-      console.error("Erro ao salvar:", error);
-      // Aqui tratamos com segurança a mensagem de erro sem depender de .response.data
-      const mensagemErro = error.message || 'Erro ao salvar item no acervo.';
-      alert(mensagemErro);
+      console.error("Erro ao salvar item do acervo:", error);
+      // alert porque o feedback da página fica atrás do dialog aberto.
+      // error.message já traz o texto do backend (interceptor do services/api).
+      alert(error.message || 'Erro ao salvar item no acervo.');
     }
   }
 
   async function excluirItem(codigo) {
     const confirmar = window.confirm(`Tem certeza que deseja excluir este item do acervo? Código: ${codigo}`);
+    if (!confirmar) return;
 
-    if (confirmar) {
-      try {
-        const resposta = await fetch(`/api/acervo/${codigo}`, { method: "DELETE" });
-        if (!resposta.ok) throw new Error("Erro ao excluir item do servidor.");
-
-        setItensAcervo(itensAcervo.filter((item) => item.codigo !== codigo));
-        setFeedback({ mensagem: 'Item excluído do acervo com sucesso!', tipo: 'success' });
-      } catch (error) {
-        console.error('Erro ao excluir item do acervo:', error);
-        setFeedback({ mensagem: error.message || 'Erro ao excluir item.', tipo: 'error' });
-      }
+    try {
+      await excluirItemAcervo(codigo);
+      setItensAcervo((atuais) => atuais.filter((item) => item.codigo !== codigo));
+      setFeedback({ mensagem: 'Item excluído do acervo com sucesso!', tipo: 'success' });
+    } catch (error) {
+      console.error('Erro ao excluir item do acervo:', error);
+      setFeedback({ mensagem: error.message || 'Erro ao excluir item.', tipo: 'error' });
     }
   }
 
-  if (erro) return <p className='aviso-tela'>{erro}</p>;
+  if (!bancoCarregado) {
+    return (
+      <div className="content-wrap" style={{ padding: "24px", textAlign: "left" }}>
+        <div style={{ display: 'flex', justifyContent: 'center' }}>
+          <CircularProgress size="3rem" aria-label="Carregando acervo" />
+        </div>
+        <p>Carregando acervo...</p>
+      </div>
+    );
+  }
 
-  setTimeout(() => {
-    setFeedback({ mensagem: '', tipo: '' });
-    }, 10000);
+  if (erro) {
+    return (
+      <div className="content-wrap">
+        <p className='aviso-tela' role="alert">{erro}</p>
+        <button className="botao-novo" onClick={() => { setBancoCarregado(false); fetchItensAcervo(); }}>
+          Tentar novamente
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="content-wrap">
@@ -215,7 +184,7 @@ function App() {
             onSalvar={salvarItemAcervo}
           />
         )}
-        
+
         {/* CABEÇALHO */}
         <div className="cabecalho-acervo">
           <h1>Gerenciamento de Acervo</h1>
@@ -230,8 +199,6 @@ function App() {
             </button>
           </div>
         </div>
-
-        {erroBanco && <p role="alert" style={{ color: "#b42318", padding: "10px" }}>{erroBanco}</p>}
 
         <br />
 
@@ -370,11 +337,11 @@ function App() {
             </tbody>
           </table>
         </div>
-        
+
         <br />
       </div>
     </div>
   );
 }
 
-export default App;
+export default GerenciamentoAcervo;
