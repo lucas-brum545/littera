@@ -15,7 +15,7 @@ Karoline Oliveira - T1
 PROS INTEGRANTES DO PROJETO, COMO COMPILAR E EXECUTAR:
 
 BACK END:
-1. Baixem (ou clonem) a api do nosso projeto (para clonar: git clone tps://github.com/lucas-brum545/littera-api)
+1. Baixem (ou clonem) a api do nosso projeto (para clonar: git clone https://github.com/lucas-brum545/littera-api)
 2. Abram o programa Docker Desktop
 3. Abram um terminal na pasta da api
 4. Executem o seguinte comando 'docker compose up --build'
