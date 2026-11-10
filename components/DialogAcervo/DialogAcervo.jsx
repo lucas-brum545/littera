@@ -229,6 +229,8 @@ export default function DialogAcervo(props) {
                 ano: dados.ano || atual.ano,
                 genero: dados.genero || atual.genero,
                 capa: atual.capa || dados.capa || "",
+                descricao: atual.descricao?.trim() ? atual.descricao : (dados.descricao || ""),
+                idioma: atual.idioma?.trim() ? atual.idioma : (dados.idioma || ""),
             }));
         } catch (erro) {
             console.error("Erro ao buscar dados:", erro);
