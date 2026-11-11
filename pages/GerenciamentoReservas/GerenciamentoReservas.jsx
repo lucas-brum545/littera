@@ -1,189 +1,299 @@
-import { useMemo, useState } from "react"
-import './GerenciamentoReservas.css'
-import { useNavigate } from "react-router"
-import { PiHandArrowDownDuotone } from "react-icons/pi"; // icone emprestimos
-import { IoArrowBack } from "react-icons/io5";
-import { FaPlus } from "react-icons/fa";
-import Alert from '@mui/material/Alert';
-import CheckIcon from '@mui/icons-material/Check';
-import dayjs from "dayjs"
-import { useEffect } from "react";
-import { atualizarReserva, criarReserva, excluirReservaApi, listarReservas } from "../../services/api";
+import { useEffect, useMemo, useState } from "react";
+import "./GerenciamentoReservas.css";
+import Alert from "@mui/material/Alert";
+import CheckIcon from "@mui/icons-material/Check";
+import { CircularProgress } from "@mui/material";
+import dayjs from "dayjs";
+
+import {
+  atualizarReserva,
+  criarReserva,
+  excluirReservaApi,
+  listarReservas,
+} from "../../services/api";
+
 import { CiBookmarkCheck } from "react-icons/ci";
 import DialogReservas from "../../components/DialogReservas/DialogReservas";
-import { CircularProgress } from "@mui/material";
 
-export default function GerenciamentoReservas(){
-    const [pesquisa, setPesquisa] = useState('')
-    const [editar, setEditar] = useState(null)
-    const [carregando, setCarregando] = useState(false)
-    const [erro, setErro] = useState('')
-    const [exibirDialog, setExibirDialog] = useState(false)
-    const [reservaParaEditar, setReservaParaEditar] = useState(null)
-    const [feedback, setFeedback] = useState({ mensagem: '', tipo: '' })
-    const navigate = useNavigate()
-    const [reservas, setReservas] = useState([])
-    
-    const normalizar = (texto) =>
-      String(texto ?? '')
-        .toLowerCase()
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '') // remove acentos
+export default function GerenciamentoReservas() {
+  const [pesquisa, setPesquisa] = useState("");
+  const [carregando, setCarregando] = useState(true);
+  const [erro, setErro] = useState("");
+  const [exibirDialog, setExibirDialog] = useState(false);
+  const [reservaParaEditar, setReservaParaEditar] = useState(null);
+  const [reservas, setReservas] = useState([]);
+  const [feedback, setFeedback] = useState({
+    mensagem: "",
+    tipo: "",
+  });
 
-    const reservasFiltradas = useMemo(() => {
-            const termo = normalizar(pesquisa.trim())
-            if (!termo) return reservas
-        
-            return reservas.filter((u) =>
-              [u.id, u.nomeUsuario, u.tituloItemAcervo, u.status].some((campo) =>
-                normalizar(campo).includes(termo)
-              )
-            )
-          }, [reservas, pesquisa])
-    
-    
-    function handleChange(e) {
-      const { name, value } = e.target
+  function normalizar(texto) {
+    return String(texto ?? "")
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "");
+  }
 
-      setFormulario({
-        ...formulario,
-        [name]: value,
-      })
+  const reservasFiltradas = useMemo(() => {
+    const termo = normalizar(pesquisa.trim());
+
+    if (!termo) {
+      return reservas;
     }
 
+    return reservas.filter((reserva) =>
+      [
+        reserva.id,
+        reserva.nomeUsuario,
+        reserva.tituloItemAcervo,
+        reserva.status,
+      ].some((campo) => normalizar(campo).includes(termo))
+    );
+  }, [reservas, pesquisa]);
 
-  const fetchReservas = async () => {
-    setErro('')
+  async function fetchReservas() {
+    setErro("");
+    setCarregando(true);
+
     try {
-      setCarregando(true)
       const data = await listarReservas();
+
+      if (!Array.isArray(data)) {
+        throw new Error(
+          "A API retornou um formato inesperado para as reservas."
+        );
+      }
+
       setReservas(data);
+      return true;
     } catch (error) {
-      console.error('Erro ao buscar reservas:', error);
-      setErro('Erro ao carregar reservas')
+      console.error("Erro ao buscar reservas:", error);
+
+      setErro(
+        error.response?.data?.message ||
+          error.response?.data?.erro ||
+          error.message ||
+          "Erro ao carregar reservas. Tente novamente."
+      );
+
+      return false;
+    } finally {
+      setCarregando(false);
     }
-    finally{
-      setCarregando(false)
-    }
-  };
+  }
 
   useEffect(() => {
-    fetchReservas();
+    let ativo = true;
+
+    async function carregarReservas() {
+      try {
+        const data = await listarReservas();
+
+        if (!ativo) return;
+
+        if (!Array.isArray(data)) {
+          throw new Error(
+            "A API retornou um formato inesperado para as reservas."
+          );
+        }
+
+        setReservas(data);
+        setErro("");
+      } catch (error) {
+        if (!ativo) return;
+
+        console.error("Erro ao buscar reservas:", error);
+
+        setErro(
+          error.response?.data?.message ||
+            error.response?.data?.erro ||
+            error.message ||
+            "Erro ao carregar reservas. Tente novamente."
+        );
+      } finally {
+        if (ativo) {
+          setCarregando(false);
+        }
+      }
+    }
+
+    carregarReservas();
+
+    return () => {
+      ativo = false;
+    };
   }, []);
 
-  if (carregando && reservas.length === 0) return <><CircularProgress sx={{display:'flex', justifyContent: 'center', color: 'primary'}} enableTrackSlot size="3rem" aria-label="Loading…" /><p className='aviso-tela'>Carregando reservas...</p></>
-  if (erro) return <p className='aviso-tela'>{erro}</p>
-
-
-    function abrirCadastro() {
-      setEditar(null)
-
-      setFormulario({
-          nomeUsuario: '',
-          emailUsuario: '',
-          tipoItem: '',
-          itemTitulo: '',
-          dataEmprestimo: "",
-          dataDevolucao: "" 
-      })
-
-      setMostrarFormulario(true)
+  useEffect(() => {
+    if (!feedback.mensagem) {
+      return;
     }
 
-   async function editarReserva(reserva) {
-    setReservaParaEditar(reserva)
-    setExibirDialog(true)
-    setEditar(reserva.id)
+    const temporizador = setTimeout(() => {
+      setFeedback({ mensagem: "", tipo: "" });
+    }, 5000);
+
+    return () => clearTimeout(temporizador);
+  }, [feedback]);
+
+  function abrirCadastro() {
+    setReservaParaEditar(null);
+    setExibirDialog(true);
   }
 
-  async function salvarReserva(dados){
+  function editarReserva(reserva) {
+    setReservaParaEditar(reserva);
+    setExibirDialog(true);
+  }
+
+  async function salvarReserva(dados) {
     try {
       if (reservaParaEditar) {
-        await atualizarReserva(reservaParaEditar.id, dados)
+        await atualizarReserva(reservaParaEditar.id, dados);
+
+        setFeedback({
+          mensagem: "Reserva atualizada com sucesso!",
+          tipo: "success",
+        });
       } else {
-        await criarReserva(dados)
+        await criarReserva(dados);
+
+        setFeedback({
+          mensagem: "Reserva cadastrada com sucesso!",
+          tipo: "success",
+        });
       }
 
-      await fetchReservas() 
-      setExibirDialog(false)
-      setReservaParaEditar(null)
-      setFeedback({ mensagem: 'Reserva cadastrada com sucesso!', tipo: 'success' })
-    }
-    catch (error) {
-      console.error('Erro ao salvar reserva:', error)
-      
-      // Captura a mensagem detalhada enviada pelo backend através do Axios
-      const mensagemErro = error.response?.data?.erro || error.response?.data?.message || error.message || 'Erro ao salvar reserva.';
-      
-      alert(mensagemErro)
-    }
+      setExibirDialog(false);
+      setReservaParaEditar(null);
 
-    setReservaParaEditar(null) // Ajustado para limpar corretamente o estado de edição
+      await fetchReservas();
+    } catch (error) {
+      console.error("Erro ao salvar reserva:", error);
+
+      setFeedback({
+        mensagem:
+          error.response?.data?.message ||
+          error.response?.data?.erro ||
+          error.message ||
+          "Erro ao salvar reserva.",
+        tipo: "error",
+      });
+    }
   }
-
-  setTimeout(() => {
-    setFeedback({ mensagem: '', tipo: '' });
-    }, 15000);
 
   async function excluirReserva(id) {
-    const confirmar = window.confirm('Deseja excluir esta reserva?')
+    const confirmar = window.confirm(
+      "Deseja realmente excluir esta reserva?"
+    );
 
-    if (confirmar) {
-      try {
-        await excluirReservaApi(id)
-        setReservas((atuais) => atuais.filter((reserva) => reserva.id !== id))
-        setFeedback({ mensagem: 'Reserva excluída com sucesso!', tipo: 'success' })
-      } catch (error) {
-        const mensagemErro = error.response.data.message || 'Erro ao excluir reserva.';
-        alert(mensagemErro)
-      }
+    if (!confirmar) {
+      return;
+    }
+
+    try {
+      await excluirReservaApi(id);
+
+      setReservas((atuais) =>
+        atuais.filter((reserva) => reserva.id !== id)
+      );
+
+      setFeedback({
+        mensagem: "Reserva excluída com sucesso!",
+        tipo: "success",
+      });
+    } catch (error) {
+      console.error("Erro ao excluir reserva:", error);
+
+      setFeedback({
+        mensagem:
+          error.response?.data?.message ||
+          error.response?.data?.erro ||
+          "Erro ao excluir reserva.",
+        tipo: "error",
+      });
     }
   }
 
-    return(<>
-      <div className="content-wrap">
-        {feedback.mensagem && (
-        <div style={{ marginBottom: '20px' }}>
+  return (
+    <div className="content-wrap">
+      {feedback.mensagem && (
+        <div style={{ marginBottom: "20px" }}>
           <Alert
-            variant='filled'
+            variant="filled"
             severity={feedback.tipo}
-            icon={feedback.tipo === 'success' ? <CheckIcon fontSize="inherit" /> : undefined}
+            icon={
+              feedback.tipo === "success" ? (
+                <CheckIcon fontSize="inherit" />
+              ) : undefined
+            }
           >
             {feedback.mensagem}
           </Alert>
-        </div>)}
-        <div className="gerenciamento-emprestimos">
-          {/* Cabeçalho alinhado com Flexbox */}
-          <div className="cabecalho-emprestimos">
-            <h1>Gerenciamento de Reservas</h1>
-            <CiBookmarkCheck className="icon"/>
-            <p>Cadastre, pesquise, edite ou exclua reservas.</p>
-            {exibirDialog && (
-              <DialogReservas
-                reservaParaEditar={reservaParaEditar}
-                onSalvar={salvarReserva}
-                onCancelar={() => setExibirDialog(false)}
-              />
-            )}
-            <div className="container-botoes">
-              <button type="button" className="botao-novo" onClick={()=>{
+        </div>
+      )}
+
+      <div className="gerenciamento-emprestimos">
+        <div className="cabecalho-emprestimos">
+          <h1>Gerenciamento de Reservas</h1>
+
+          <CiBookmarkCheck className="icon" />
+
+          <p>Cadastre, pesquise, edite ou exclua reservas.</p>
+
+          {exibirDialog && (
+            <DialogReservas
+              key={reservaParaEditar?.id ?? "nova-reserva"}
+              reservaParaEditar={reservaParaEditar}
+              onSalvar={salvarReserva}
+              onCancelar={() => {
+                setExibirDialog(false);
                 setReservaParaEditar(null);
-                setExibirDialog(true);
-              }}>
-                Cadastrar Nova Reserva
-              </button>
-            </div>
-          </div>
-
-          <div className="barra-pesquisa">
-            <input
-              type="text"
-              placeholder="Pesquisar reserva por nome do usuário, título do item ou status"
-              value={pesquisa}
-              onChange={(e) => setPesquisa(e.target.value)}
+              }}
             />
-          </div>
+          )}
 
+          <div className="container-botoes">
+            <button
+              type="button"
+              className="botao-novo"
+              onClick={abrirCadastro}
+            >
+              Cadastrar Nova Reserva
+            </button>
+          </div>
+        </div>
+
+        <div className="barra-pesquisa">
+          <input
+            type="text"
+            placeholder="Pesquisar reserva por nome do usuário, título do item ou status"
+            value={pesquisa}
+            onChange={(e) => setPesquisa(e.target.value)}
+          />
+        </div>
+
+        {erro && (
+          <div style={{ marginTop: "15px" }}>
+            <Alert
+              severity="error"
+              action={
+                <button type="button" onClick={fetchReservas}>
+                  Tentar novamente
+                </button>
+              }
+            >
+              {erro}
+            </Alert>
+          </div>
+        )}
+
+        {carregando ? (
+          <div className="aviso-tela">
+            <CircularProgress size="3rem" />
+            <p>Carregando reservas...</p>
+          </div>
+        ) : (
           <div className="tabela-container">
             <table>
               <thead>
@@ -199,24 +309,38 @@ export default function GerenciamentoReservas(){
 
               <tbody>
                 {reservasFiltradas.length > 0 ? (
-                  reservasFiltradas.map((res) => (
-                    <tr key={res.id}>
-                      <td>{res.id}</td>
-                      <td>{res.nomeUsuario}</td>
-                      <td>{res.tituloItemAcervo}</td>
-                      <td>{dayjs(res.dataReserva).format("DD/MM/YYYY")}</td>
-                      <td>{res.status}</td>
+                  reservasFiltradas.map((reserva) => (
+                    <tr key={reserva.id}>
+                      <td>{reserva.id}</td>
+
+                      <td>{reserva.nomeUsuario || "Não informado"}</td>
+
+                      <td>
+                        {reserva.tituloItemAcervo || "Não informado"}
+                      </td>
+
+                      <td>
+                        {reserva.dataReserva &&
+                        dayjs(reserva.dataReserva).isValid()
+                          ? dayjs(reserva.dataReserva).format("DD/MM/YYYY")
+                          : "Não informada"}
+                      </td>
+
+                      <td>{reserva.status}</td>
+
                       <td className="acoes">
                         <button
+                          type="button"
                           className="botao-editar"
-                          onClick={() => editarReserva(res)}
+                          onClick={() => editarReserva(reserva)}
                         >
                           Editar
                         </button>
 
                         <button
+                          type="button"
                           className="botao-excluir"
-                          onClick={() => excluirReserva(res.id)}
+                          onClick={() => excluirReserva(reserva.id)}
                         >
                           Excluir
                         </button>
@@ -225,15 +349,18 @@ export default function GerenciamentoReservas(){
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="7" className="nenhum-emprestimo">
-                      Nenhum empréstimo encontrado.
+                    <td colSpan="6" className="nenhum-emprestimo">
+                      {pesquisa.trim()
+                        ? "Nenhuma reserva encontrada para essa pesquisa."
+                        : "Nenhuma reserva cadastrada."}
                     </td>
                   </tr>
                 )}
               </tbody>
             </table>
           </div>
-        </div>
+        )}
       </div>
-    </>)
+    </div>
+  );
 }

@@ -1,182 +1,396 @@
-import { Dialog, DialogContent, DialogTitle, Stack, DialogActions, Button, TextField, Select, MenuItem, InputLabel, FormControl, Autocomplete } from "@mui/material";
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  Stack,
+  DialogActions,
+  Button,
+  TextField,
+  Select,
+  MenuItem,
+  InputLabel,
+  FormControl,
+  Autocomplete,
+  Alert,
+  CircularProgress,
+} from "@mui/material";
+
 import { useState, useEffect } from "react";
-import { listarItensAcervo, listarUsuarios } from "../../services/api";
-import dayjs from "dayjs";
-import DatePicker from "react-datepicker";
 
-export default function DialogReservas({ reservaParaEditar, onCancelar, onSalvar }) {
-    // Inicializa a data com HOJE por padrão caso não seja edição
-    const [formulario, setFormulario] = useState({
-        usuarioId: '',
-        itemCodigo: '',
-        status: 'PENDENTE'
-    });
-    const [tipo, setTipo] = useState('LIVRO');
-    const [usuarios, setUsuarios] = useState([]);
-    const [itensAcervo, setItensAcervo] = useState([]);
+import {
+  listarItensAcervo,
+  listarUsuarios,
+} from "../../services/api";
 
-    // Rotina que carrega os usuários para seleção
-    useEffect(() => {
-        async function carregarUsuarios() {
-            try {
-                const data = await listarUsuarios();
-                setUsuarios(data);
-            } catch (error) {
-                console.error('Erro ao buscar usuários:', error);
-            }
+export default function DialogReservas({
+  reservaParaEditar,
+  onCancelar,
+  onSalvar,
+}) {
+  const [formulario, setFormulario] = useState({
+    usuarioId: reservaParaEditar?.usuarioId ?? "",
+    itemCodigo: reservaParaEditar?.itemCodigo ?? "",
+    status: reservaParaEditar?.status || "PENDENTE",
+  });
+
+  const [tipo, setTipo] = useState("LIVRO");
+  const [usuarios, setUsuarios] = useState([]);
+  const [itensAcervo, setItensAcervo] = useState([]);
+
+  const [carregando, setCarregando] = useState(true);
+  const [salvando, setSalvando] = useState(false);
+  const [erroCarregamento, setErroCarregamento] = useState("");
+  const [erroFormulario, setErroFormulario] = useState("");
+
+  // Carrega usuários e itens do acervo.
+  useEffect(() => {
+    async function carregarDados() {
+      try {
+        setCarregando(true);
+        setErroCarregamento("");
+
+        const [dadosUsuarios, dadosAcervo] = await Promise.all([
+          listarUsuarios(),
+          listarItensAcervo(),
+        ]);
+
+        if (!Array.isArray(dadosUsuarios)) {
+          throw new Error("Formato inesperado na lista de usuários.");
         }
-        carregarUsuarios();
-    }, []);
 
-    // Rotina que carrega os itens de acervo para seleção
-    useEffect(() => {
-        async function carregarAcervo() {
-            try {
-                const data = await listarItensAcervo();
-                setItensAcervo(data);
-            } catch (error) {
-                console.error('Erro ao buscar acervo:', error);
-            }
+        if (!Array.isArray(dadosAcervo)) {
+          throw new Error("Formato inesperado na lista do acervo.");
         }
-        carregarAcervo();
-    }, []);
 
-    useEffect(() => {
-        if (reservaParaEditar) {
-            setFormulario({
-                usuarioId: reservaParaEditar.usuarioId || '',
-                itemCodigo: reservaParaEditar.itemCodigo || '',
-                status: reservaParaEditar.status || 'PENDENTE'
-            });
-        } else {
-            setFormulario({ usuarioId: '', itemCodigo: '', status: 'PENDENTE' });
-        }
-    }, [reservaParaEditar]);
+        setUsuarios(dadosUsuarios);
+        setItensAcervo(dadosAcervo);
+      } catch (error) {
+        console.error("Erro ao carregar dados da reserva:", error);
 
-    useEffect(() => {
-        if (reservaParaEditar && itensAcervo.length > 0) {
-            const item = itensAcervo.find((i) => i.codigo === Number(reservaParaEditar.itemCodigo));
-            if (item) setTipo(item.tipo);
-        }
-    }, [reservaParaEditar, itensAcervo]);
-
-    // Mostra todos os itens do tipo selecionado, independentemente da disponibilidade
-    const opcoesItens = itensAcervo.filter(
-        (i) => i.tipo === tipo
-    );
-
-    const rotuloItem = (i) =>
-        i.tipo === 'LIVRO'
-            ? `${i.titulo} - ${i.autor || 'Autor desconhecido'} (${i.genero || 'Gênero N/I'})`
-            : `${i.titulo} - ed. ${i.edicao || 'N/I'}`;
-
-    function trocarTipo(e) {
-        setTipo(e.target.value);
-        setFormulario((atual) => ({ ...atual, itemCodigo: '' }));
+        setErroCarregamento(
+          error.response?.data?.message ||
+            error.response?.data?.erro ||
+            error.message ||
+            "Não foi possível carregar os dados necessários."
+        );
+      } finally {
+        setCarregando(false);
+      }
     }
 
-    function handleChange(e) {
-        const { name, value } = e.target;
-        setFormulario((atual) => ({ ...atual, [name]: value }));
+    carregarDados();
+  }, []);
+
+  // Identifica o tipo do item da reserva que está sendo editada.
+  const itemDaReserva = reservaParaEditar
+    ? itensAcervo.find(
+        (item) =>
+          String(item.codigo) ===
+          String(reservaParaEditar.itemCodigo)
+      )
+    : null;
+
+  const tipoAtual = reservaParaEditar
+    ? itemDaReserva?.tipo || tipo
+    : tipo;
+
+  // Filtra os itens conforme o tipo selecionado.
+  const opcoesItens = itensAcervo.filter(
+    (item) => item.tipo === tipoAtual
+  );
+
+  // Formata a descrição dos itens do acervo.
+  function rotuloItem(item) {
+    if (item.tipo === "LIVRO") {
+      return `${item.titulo} - ${
+        item.autor || "Autor desconhecido"
+      } (${item.genero || "Gênero não informado"})`;
     }
-    
-    function enviar(event) {
-        event.preventDefault();
-            
-        const reserva = {
-            usuarioId: formulario.usuarioId,
-            itemCodigo: formulario.itemCodigo,
-            status: reservaParaEditar ? formulario.status : 'PENDENTE', // Define PENDENTE internamente se for novo cadastro
-        };
-    
-        if (reservaParaEditar) {
-            reserva.id = reservaParaEditar.id;
-        }
-            
-        onSalvar(reserva);
+
+    return `${item.titulo} - ed. ${item.edicao || "Não informada"}`;
+  }
+
+  // Atualiza o tipo e limpa o item anteriormente selecionado.
+  function trocarTipo(event) {
+    setTipo(event.target.value);
+
+    setFormulario((atual) => ({
+      ...atual,
+      itemCodigo: "",
+    }));
+
+    setErroFormulario("");
+  }
+
+  // Atualiza os campos controlados do formulário.
+  function handleChange(event) {
+    const { name, value } = event.target;
+
+    setFormulario((atual) => ({
+      ...atual,
+      [name]: value,
+    }));
+
+    setErroFormulario("");
+  }
+
+  // Valida e envia os dados da reserva.
+  async function enviar(event) {
+    event.preventDefault();
+
+    if (!formulario.usuarioId) {
+      setErroFormulario("Selecione um usuário.");
+      return;
     }
 
-    return (
-        <Dialog open fullWidth maxWidth="sm" sx={{ '& .MuiDialog-paper': { borderRadius: '10px', padding: '20px', height:'600px' } }}>
-            <DialogTitle sx={{ fontWeight: 'bold', fontFamily: 'Arial', color: '#666' }}>
-                {reservaParaEditar ? `Editar Reserva ID: ${reservaParaEditar.id}` : "Cadastrar Nova Reserva"}
-            </DialogTitle>
-            <DialogContent>
-                <form onSubmit={enviar}>
-                    <Stack spacing={2} sx={{ mt: 2 }}>
-                        {/* Seletor de Usuário */}
-                        <Autocomplete
-                            disablePortal
-                            options={usuarios}
-                            getOptionLabel={(u) => `${u.nome || u.username} (${u.email || ''})`}
-                            isOptionEqualToValue={(opcao, valor) => opcao.id === valor.id}
-                            value={usuarios.find((u) => u.id === Number(formulario.usuarioId)) || null}
-                            onChange={(e, usuario) =>
-                                setFormulario((atual) => ({ ...atual, usuarioId: usuario ? usuario.id : '' }))
-                            }
-                            disabled={!!reservaParaEditar}
-                            renderInput={(params) => <TextField {...params} label="Selecionar usuário" required />}
-                        />
+    if (!formulario.itemCodigo) {
+      setErroFormulario("Selecione um item do acervo.");
+      return;
+    }
 
-                        {/* Seletor do Tipo de Item */}
-                        <FormControl fullWidth disabled={!!reservaParaEditar}>
-                            <InputLabel id="tipo-item-label">Tipo de item</InputLabel>
-                            <Select
-                                labelId="tipo-item-label"
-                                label="Tipo de item"
-                                value={tipo}
-                                onChange={trocarTipo}
-                            >
-                                <MenuItem value="LIVRO">Livro</MenuItem>
-                                <MenuItem value="REVISTA">Revista</MenuItem>
-                            </Select>
-                        </FormControl>
+    if (
+      reservaParaEditar &&
+      !["PENDENTE", "CONCLUIDA"].includes(formulario.status)
+    ) {
+      setErroFormulario("Selecione um status válido.");
+      return;
+    }
 
-                        {/* Seletor do Livro ou Revista */}
-                        <Autocomplete
-                            disablePortal
-                            options={opcoesItens}
-                            getOptionLabel={rotuloItem}
-                            isOptionEqualToValue={(opcao, valor) => opcao.codigo === valor.codigo}
-                            value={opcoesItens.find((i) => i.codigo === Number(formulario.itemCodigo)) || null}
-                            onChange={(e, item) =>
-                                setFormulario((atual) => ({ ...atual, itemCodigo: item ? item.codigo : '' }))
-                            }
-                            disabled={!!reservaParaEditar}
-                            noOptionsText="Nenhum item disponível"
-                            renderInput={(params) => (
-                                <TextField {...params} label={tipo === 'LIVRO' ? 'Selecionar livro' : 'Selecionar revista'} required />
-                            )}
-                        />
+    const reserva = {
+      usuarioId: formulario.usuarioId,
+      itemCodigo: formulario.itemCodigo,
+      status: reservaParaEditar
+        ? formulario.status
+        : "PENDENTE",
+    };
 
-                        {/* Seletor de Status (Exibido APENAS ao editar) */}
-                        {reservaParaEditar && (
-                            <FormControl fullWidth>
-                                <InputLabel id="status-label">Status</InputLabel>
-                                <Select 
-                                    labelId="status-label"
-                                    name="status"
-                                    value={formulario.status} 
-                                    onChange={handleChange} 
-                                    label="Status"
-                                >
-                                    <MenuItem value={'PENDENTE'}>Pendente</MenuItem>
-                                    <MenuItem value={'CONCLUIDA'}>Concluída</MenuItem>
-                                </Select>
-                            </FormControl>
-                        )}
-                    </Stack>
-                    
-                    <DialogActions sx={{ mt: 3 }}>
-                        <Button type="button" onClick={() => onCancelar()} sx={{ fontWeight: 'bold', fontFamily: 'Arial' }}>
-                            Cancelar
-                        </Button>
-                        <Button type="submit" color="success" sx={{ fontWeight: 'bold', fontFamily: 'Arial' }}>
-                            {reservaParaEditar ? "Atualizar" : "Cadastrar"}
-                        </Button>
-                    </DialogActions>
-                </form>
-            </DialogContent>
-        </Dialog>
-    );
+    if (reservaParaEditar) {
+      reserva.id = reservaParaEditar.id;
+    }
+
+    try {
+      setSalvando(true);
+      setErroFormulario("");
+
+      const resultado = await onSalvar(reserva);
+
+      if (resultado === false) {
+        return;
+      }
+    } catch (error) {
+      console.error("Erro ao enviar reserva:", error);
+
+      setErroFormulario(
+        error.response?.data?.message ||
+          error.response?.data?.erro ||
+          "Não foi possível salvar a reserva."
+      );
+    } finally {
+      setSalvando(false);
+    }
+  }
+
+  return (
+    <Dialog
+      open
+      fullWidth
+      maxWidth="sm"
+      onClose={salvando ? undefined : onCancelar}
+      sx={{
+        "& .MuiDialog-paper": {
+          borderRadius: "10px",
+          padding: "20px",
+          minHeight: "400px",
+        },
+      }}
+    >
+      <DialogTitle
+        sx={{
+          fontWeight: "bold",
+          fontFamily: "Arial",
+          color: "#666",
+        }}
+      >
+        {reservaParaEditar
+          ? `Editar Reserva ID: ${reservaParaEditar.id}`
+          : "Cadastrar Nova Reserva"}
+      </DialogTitle>
+
+      <DialogContent>
+        {carregando ? (
+          <Stack
+            alignItems="center"
+            justifyContent="center"
+            spacing={2}
+            sx={{ padding: 4 }}
+          >
+            <CircularProgress />
+            <p>Carregando usuários e itens do acervo...</p>
+          </Stack>
+        ) : erroCarregamento ? (
+          <Alert severity="error" sx={{ mt: 2 }}>
+            {erroCarregamento}
+          </Alert>
+        ) : (
+          <form onSubmit={enviar}>
+            <Stack spacing={2} sx={{ mt: 2 }}>
+              {erroFormulario && (
+                <Alert severity="error">
+                  {erroFormulario}
+                </Alert>
+              )}
+
+              {/* Seleção do usuário */}
+              <Autocomplete
+                disablePortal
+                options={usuarios}
+                getOptionLabel={(usuario) =>
+                  `${usuario.nome || usuario.username || "Usuário"} (${
+                    usuario.email || ""
+                  })`
+                }
+                isOptionEqualToValue={(opcao, valor) =>
+                  String(opcao.id) === String(valor.id)
+                }
+                value={
+                  usuarios.find(
+                    (usuario) =>
+                      String(usuario.id) ===
+                      String(formulario.usuarioId)
+                  ) || null
+                }
+                onChange={(event, usuario) =>
+                  setFormulario((atual) => ({
+                    ...atual,
+                    usuarioId: usuario ? usuario.id : "",
+                  }))
+                }
+                disabled={!!reservaParaEditar || salvando}
+                noOptionsText="Nenhum usuário encontrado"
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="Selecionar usuário"
+                    required
+                  />
+                )}
+              />
+
+              {/* Seleção do tipo de item */}
+              <FormControl
+                fullWidth
+                disabled={!!reservaParaEditar || salvando}
+              >
+                <InputLabel id="tipo-item-label">
+                  Tipo de item
+                </InputLabel>
+
+                <Select
+                  labelId="tipo-item-label"
+                  label="Tipo de item"
+                  value={tipoAtual}
+                  onChange={trocarTipo}
+                >
+                  <MenuItem value="LIVRO">Livro</MenuItem>
+                  <MenuItem value="REVISTA">Revista</MenuItem>
+                </Select>
+              </FormControl>
+
+              {/* Seleção do livro ou revista */}
+              <Autocomplete
+                disablePortal
+                options={opcoesItens}
+                getOptionLabel={rotuloItem}
+                isOptionEqualToValue={(opcao, valor) =>
+                  String(opcao.codigo) === String(valor.codigo)
+                }
+                value={
+                  opcoesItens.find(
+                    (item) =>
+                      String(item.codigo) ===
+                      String(formulario.itemCodigo)
+                  ) || null
+                }
+                onChange={(event, item) =>
+                  setFormulario((atual) => ({
+                    ...atual,
+                    itemCodigo: item ? item.codigo : "",
+                  }))
+                }
+                disabled={!!reservaParaEditar || salvando}
+                noOptionsText="Nenhum item encontrado para este tipo"
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label={
+                      tipoAtual === "LIVRO"
+                        ? "Selecionar livro"
+                        : "Selecionar revista"
+                    }
+                    required
+                  />
+                )}
+              />
+
+              {/* Status disponível somente durante a edição */}
+              {reservaParaEditar && (
+                <FormControl fullWidth disabled={salvando}>
+                  <InputLabel id="status-label">
+                    Status
+                  </InputLabel>
+
+                  <Select
+                    labelId="status-label"
+                    name="status"
+                    value={formulario.status}
+                    onChange={handleChange}
+                    label="Status"
+                  >
+                    <MenuItem value="PENDENTE">
+                      Pendente
+                    </MenuItem>
+
+                    <MenuItem value="CONCLUIDA">
+                      Concluída
+                    </MenuItem>
+                  </Select>
+                </FormControl>
+              )}
+            </Stack>
+
+            <DialogActions sx={{ mt: 3 }}>
+              <Button
+                type="button"
+                onClick={onCancelar}
+                disabled={salvando}
+                sx={{
+                  fontWeight: "bold",
+                  fontFamily: "Arial",
+                }}
+              >
+                Cancelar
+              </Button>
+
+              <Button
+                type="submit"
+                color="success"
+                variant="contained"
+                disabled={salvando}
+                sx={{
+                  fontWeight: "bold",
+                  fontFamily: "Arial",
+                }}
+              >
+                {salvando
+                  ? "Salvando..."
+                  : reservaParaEditar
+                    ? "Atualizar"
+                    : "Cadastrar"}
+              </Button>
+            </DialogActions>
+          </form>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
 }
