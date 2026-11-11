@@ -1,8 +1,7 @@
-.content-wrap{
+/* .content-wrap{
   flex: 1;
 }
 
-/* cabeçalho da pagina */
 .gerenciamento-emprestimos {
   width: max-content;
   box-sizing: border-box;
@@ -220,4 +219,324 @@
   text-align: center;
   font-size: 18px;
   font-weight: bold;
+} */
+
+
+.content-wrap {
+  flex: 1;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+/* cabeçalho da pagina */
+.gerenciamento-emprestimos {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.cabecalho-emprestimos {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 16px;
+  margin-left: 0;
+  padding-bottom: 12px;
+  width: 100%;
+}
+
+.cabecalho-emprestimos h1 {
+  font-size: clamp(1.4rem, 2.2vw, 1.875rem);
+  margin: 0;
+  padding: 0;
+  width: auto;
+  line-height: 1.2;
+  display: flex;
+  align-items: center;
+}
+
+.cabecalho-emprestimos p {
+  margin: 0;
+  margin-right: auto;
+  color: white;
+  padding: 0 !important;
+  width: auto;
+  max-width: 420px;
+  font-weight: bold;
+  line-height: 1.4;
+}
+
+.container-botoes {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-left: auto;
+}
+
+.botao-novo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: linear-gradient(135deg, #16a34a, #15803d);
+  color: white;
+  border-radius: 8px;
+  min-height: 46px;
+  height: auto;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 12px 20px;
+  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.35);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.2s ease;
+  opacity: 1 !important;
+  white-space: nowrap;
+}
+
+.botao-novo:hover {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(22, 163, 74, 0.45);
+}
+
+.barra-pesquisa {
+  margin-bottom: 20px;
+  margin-top: 12px;
+  width: 100%;
+}
+
+.barra-pesquisa input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 8px;
+  background-color: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-sizing: border-box;
+  font-size: 15px;
+  color: #1e293b;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+.barra-pesquisa input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  background-color: #ffffff;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.35), 0 4px 12px rgba(0, 0, 0, 0.18);
+}
+
+.formulario-emprestimo {
+  background: #f7f7f7;
+  padding: 24px;
+  border-radius: 8px;
+  margin-bottom: 25px;
+  width: 100%;
+  max-width: 600px;
+}
+
+.formulario-emprestimo h2 {
+  color: #666;
+  margin-top: 0;
+  margin-bottom: 20px;
+}
+
+.formulario-emprestimo label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: bold;
+  color: #666;
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 15px;
+}
+
+.campo label {
+  margin-bottom: 6px;
+  font-weight: bold;
+}
+
+.campo input {
+  padding: 11px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 15px;
+}
+
+.acoes-formulario {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.acoes-formulario button,
+.acoes button {
+  border: none;
+  padding: 6px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 12.5px;
+}
+
+.botao-salvar {
+  background: #2c3e50;
+  color: white;
+}
+
+.botao-cancelar {
+  background: #c0392b;
+  color: white;
+}
+
+.tabela-container {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  border-radius: 10px;
+  background: #ffffff;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+
+.tabela-container table {
+  width: 100%;
+  table-layout: auto;
+  border-collapse: collapse;
+  background: white;
+}
+
+.tabela-container th,
+.tabela-container td {
+  padding: 10px 6px;
+  text-align: left;
+  border-bottom: 1px solid #e2e8f0;
+  color: #1e293b;
+  font-size: clamp(11px, 0.78vw, 13px);
+  letter-spacing: normal;
+  vertical-align: middle;
+}
+
+.tabela-container th {
+  background: #f1f5f9;
+  color: #0f172a;
+  font-weight: 700;
+  border-bottom: 2px solid #cbd5e1;
+  white-space: nowrap;
+}
+
+.tabela-container tbody tr {
+  transition: background-color 0.15s ease;
+}
+
+.tabela-container tbody tr:nth-child(even) {
+  background-color: #f8fafc;
+}
+
+.tabela-container tbody tr:hover {
+  background-color: #eef2ff;
+}
+
+.acoes {
+  white-space: nowrap;
+}
+
+.botao-editar {
+  background: #e2e8f0;
+  color: #1e293b;
+  font-weight: 600;
+  margin-right: 4px;
+  transition: background-color 0.15s ease, transform 0.15s ease;
+}
+
+.botao-editar:hover {
+  background: #cbd5e1;
+  transform: translateY(-1px);
+}
+
+.botao-excluir {
+  background: #dc2626;
+  color: white;
+  font-weight: 600;
+  transition: background-color 0.15s ease, transform 0.15s ease;
+}
+
+.botao-excluir:hover {
+  background: #b91c1c;
+  transform: translateY(-1px);
+}
+
+.nenhum-emprestimo {
+  text-align: center !important;
+  padding: 30px !important;
+  color: #777;
+}
+
+.botao-voltar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: #2c3e50;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: bold;
+  letter-spacing: 0.75px;
+  padding: 10px 16px;
+  transition: filter 0.2s ease;
+  opacity: 1 !important;
+}
+
+.botao-voltar:hover {
+  filter: brightness(1.2);
+}
+
+.cabecalho-emprestimos .icon,
+.icon {
+  color: #ffffff !important;
+  padding-right: 0;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.aviso-tela {
+  text-align: center;
+  font-size: 18px;
+  font-weight: bold;
+  padding: 16px !important;
+}
+
+@media (max-width: 900px) {
+  .cabecalho-emprestimos p {
+    flex-basis: 100%;
+    max-width: 100%;
+  }
+
+  .container-botoes {
+    margin-left: 0;
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .botao-novo {
+    width: 100%;
+  }
+
+  .tabela-container th,
+  .tabela-container td {
+    padding: 10px 8px;
+    font-size: 13px;
+  }
 }

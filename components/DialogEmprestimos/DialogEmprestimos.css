@@ -1,4 +1,4 @@
-.date-picker-wrapper {
+/* .date-picker-wrapper {
   width: 100%;
 }
 
@@ -16,4 +16,45 @@
   border-color: #1976d2;
   border-width: 2px;
   padding: 15.5px 13px;
+} */
+
+.date-picker-wrapper {
+  width: 100%;
+}
+
+.input-datepicker-mui {
+  width: 100%;
+  padding: 16.5px 14px;
+  border: 1px solid rgba(0, 0, 0, 0.23);
+  border-radius: 4px;
+  font-size: 1rem;
+  outline: none;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+
+.input-datepicker-mui:focus {
+  border-color: #1976d2;
+  border-width: 2px;
+  padding: 15.5px 13px;
+}
+
+.MuiDialog-paper {
+  height: auto !important;
+  max-height: 90vh !important;
+  margin: 16px !important;
+  width: calc(100% - 32px) !important;
+  overflow-x: hidden !important;
+}
+
+.MuiDialogContent-root {
+  overflow-x: hidden !important;
+}
+
+@media (max-width: 480px) {
+  .MuiDialog-paper {
+    padding: 12px !important;
+    margin: 8px !important;
+    width: calc(100% - 16px) !important;
+  }
 }
