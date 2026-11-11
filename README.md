@@ -1,16 +1,17 @@
-PROJETO FINAL CURSO DEV FULL STACK +PRA TI
+﻿# React + Vite
 
-Lucas Brum - T1
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-Luiz Lobato - T2
+Currently, two official plugins are available:
 
-Enzo Ornelas - T1
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
 
-Joyce Cruz - T2
+## React Compiler
 
-Milton Martins - T1
+The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
 
-Karoline Oliveira - T1
+Karoline Zimmer de Oliveira
 
 PROS INTEGRANTES DO PROJETO, COMO COMPILAR E EXECUTAR:
 
@@ -27,7 +28,7 @@ FRONT END:
 3. Selecionem a pasta do projeto
 4. Rodem 'npm run dev' na pasta
 5. Acessem o link http://localhost:5173/
-6. Aparecerá a tela de login, insiram as seguintes credenciais:
-   Usuário: admin@littera.com
+6. AparecerÃ¡ a tela de login, insiram as seguintes credenciais:
+   UsuÃ¡rio: admin@littera.com
    Senha: 12345678
 7. Testem o projeto e me mandem o que acharem relevante

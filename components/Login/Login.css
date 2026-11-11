@@ -63,7 +63,7 @@ body{
 }
 
 .input-field input::placeholder {
-  color: #696868;
+  color: #fff;
 }
 
 .input-field .icon {
