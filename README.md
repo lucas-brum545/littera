@@ -156,7 +156,8 @@ O projeto segue o fluxo baseado em branches para manter a estabilidade em produ�
 
 ## 👨‍💻 Autoria
 
-Desenvolvido por 
+Desenvolvido por<br>
+<br>
 **Lucas Brum**<br>
 **Luiz Lobato**<br>
 **Joyce Cruz**<br>
