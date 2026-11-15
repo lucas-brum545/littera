@@ -3,7 +3,18 @@ import DialogAcervo from '../../components/DialogAcervo/DialogAcervo'
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import { ImBooks } from 'react-icons/im';
 import './GerenciamentoAcervo.css';
-import { Alert, CircularProgress } from "@mui/material";
+import {
+  Alert,
+  CircularProgress,
+  Tooltip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  Typography,
+  Box,
+} from "@mui/material";
 import {
   atualizarItemAcervo,
   criarItemAcervo,
@@ -38,10 +49,109 @@ function formatarDataHora(valor) {
   }).format(data);
 }
 
+function CelulaDescricao({ item, onAbrirDetalhes }) {
+  const descricao = item.descricao?.trim();
+  const temDescricao = Boolean(descricao);
+  const rotulo = item.tipo === 'LIVRO' ? 'Sinopse do Livro' : 'Descrição da Revista';
+
+  if (!temDescricao) {
+    return <span style={{ color: '#94a3b8', fontStyle: 'italic' }}>Sem descrição</span>;
+  }
+
+  return (
+    <Tooltip
+      arrow
+      interactive
+      placement="top"
+      enterDelay={150}
+      leaveDelay={200}
+      title={
+        <Box sx={{ p: 1, maxWidth: 380, maxHeight: 260, overflowY: 'auto' }}>
+          <Typography
+            variant="subtitle2"
+            sx={{
+              fontWeight: 700,
+              color: '#93c5fd',
+              mb: 0.5,
+              borderBottom: '1px solid rgba(255,255,255,0.15)',
+              pb: 0.5,
+              fontSize: '0.85rem'
+            }}
+          >
+            {rotulo}: {item.titulo}
+          </Typography>
+          <Typography
+            variant="body2"
+            sx={{
+              whiteSpace: 'pre-line',
+              fontSize: '0.82rem',
+              lineHeight: 1.5,
+              color: '#f8fafc'
+            }}
+          >
+            {descricao}
+          </Typography>
+          <Typography
+            variant="caption"
+            sx={{
+              display: 'block',
+              mt: 1,
+              color: '#94a3b8',
+              fontSize: '0.72rem',
+              fontStyle: 'italic'
+            }}
+          >
+            (Clique para expandir)
+          </Typography>
+        </Box>
+      }
+      slotProps={{
+        tooltip: {
+          sx: {
+            bgcolor: '#0f172a',
+            color: '#ffffff',
+            boxShadow: '0 12px 28px rgba(0, 0, 0, 0.45)',
+            border: '1px solid #334155',
+            borderRadius: '8px',
+            maxWidth: 420,
+            p: 1.25,
+          },
+        },
+        arrow: {
+          sx: {
+            color: '#0f172a',
+            '&::before': {
+              border: '1px solid #334155',
+            },
+          },
+        },
+      }}
+    >
+      <span
+        onClick={() => onAbrirDetalhes(item)}
+        style={{
+          display: 'block',
+          width: '100%',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap',
+          textDecoration: 'underline dotted',
+          textUnderlineOffset: '3px',
+          textDecorationColor: '#94a3b8',
+          cursor: 'pointer',
+        }}
+      >
+        {descricao}
+      </span>
+    </Tooltip>
+  );
+}
+
 function GerenciamentoAcervo() {
   const [itensAcervo, setItensAcervo] = useState([]);
   const [exibirDialog, setExibirDialog] = useState(false);
   const [itemParaEditar, setItemParaEditar] = useState(null);
+  const [itemVisualizarDescricao, setItemVisualizarDescricao] = useState(null);
   const [bancoCarregado, setBancoCarregado] = useState(false);
   const [erro, setErro] = useState('');
   const [feedback, setFeedback] = useState({ mensagem: '', tipo: '' });
@@ -185,6 +295,31 @@ function GerenciamentoAcervo() {
           />
         )}
 
+        {/* DIALOG DE VISUALIZAÇÃO COMPLETA DA DESCRIÇÃO */}
+        {itemVisualizarDescricao && (
+          <Dialog
+            open
+            onClose={() => setItemVisualizarDescricao(null)}
+            maxWidth="sm"
+            fullWidth
+            sx={{ '& .MuiDialog-paper': { borderRadius: '12px', padding: '16px' } }}
+          >
+            <DialogTitle sx={{ fontWeight: 700, pb: 1, color: '#1e293b' }}>
+              {itemVisualizarDescricao.tipo === 'LIVRO' ? 'Sinopse do Livro' : 'Descrição da Revista'}: {itemVisualizarDescricao.titulo}
+            </DialogTitle>
+            <DialogContent dividers>
+              <Typography variant="body1" sx={{ whiteSpace: 'pre-line', lineHeight: 1.6, color: '#334155', fontSize: '0.95rem' }}>
+                {itemVisualizarDescricao.descricao}
+              </Typography>
+            </DialogContent>
+            <DialogActions sx={{ pt: 2 }}>
+              <Button onClick={() => setItemVisualizarDescricao(null)} variant="contained" color="primary">
+                Fechar
+              </Button>
+            </DialogActions>
+          </Dialog>
+        )}
+
         {/* CABEÇALHO */}
         <div className="cabecalho-acervo">
           <h1>Gerenciamento de Acervo</h1>
@@ -251,7 +386,9 @@ function GerenciamentoAcervo() {
                     <td>{revista.mesAnoPublicacao}</td>
                     <td>{revista.ano}</td>
                     <td>{revista.idioma || "N/I"}</td>
-                    <td className="coluna-descricao" title={revista.descricao || "Sem descrição"}>{revista.descricao ? revista.descricao : "Sem descrição"}</td>
+                    <td className="coluna-descricao">
+                      <CelulaDescricao item={revista} onAbrirDetalhes={setItemVisualizarDescricao} />
+                    </td>
                     <td>{revista.totalDisponivel}</td>
                     <td>{revista.totalEmprestados}</td>
                     <td>{revista.localizacao}</td>
@@ -318,8 +455,8 @@ function GerenciamentoAcervo() {
                     <td>{livro.titulo}</td>
                     <td>{livro.autor}</td>
                     <td>{livro.genero}</td>
-                    <td className="coluna-descricao" title={livro.descricao || "Sem descrição"}>
-                      {livro.descricao ? livro.descricao : "Sem descrição"}
+                    <td className="coluna-descricao">
+                      <CelulaDescricao item={livro} onAbrirDetalhes={setItemVisualizarDescricao} />
                     </td>
                     <td>{livro.isbn}</td>
                     <td>{livro.ano}</td>

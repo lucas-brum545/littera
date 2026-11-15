@@ -232,10 +232,8 @@
   text-overflow: ellipsis;
 }
 
-.gerenciamento-acervo .tabela-container td:nth-child(9):hover,
-.gerenciamento-acervo .tabela-container td.coluna-descricao:hover {
-  white-space: normal;
-  overflow: visible;
+.gerenciamento-acervo .tabela-container td.coluna-descricao {
+  cursor: pointer;
 }
 
 .acoes {
