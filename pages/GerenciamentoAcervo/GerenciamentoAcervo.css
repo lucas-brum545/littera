@@ -179,7 +179,7 @@
 .tabela-container {
   width: 100%;
   max-width: 100%;
-  overflow-x: hidden;
+  overflow-x: auto;
   border-radius: 10px;
   background: #ffffff;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
@@ -224,14 +224,16 @@
   background-color: #eef2ff;
 }
 
-.gerenciamento-acervo .tabela-container td:nth-child(9) {
+.gerenciamento-acervo .tabela-container td:nth-child(9),
+.gerenciamento-acervo .tabela-container td.coluna-descricao {
   max-width: 180px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.gerenciamento-acervo .tabela-container td:nth-child(9):hover {
+.gerenciamento-acervo .tabela-container td:nth-child(9):hover,
+.gerenciamento-acervo .tabela-container td.coluna-descricao:hover {
   white-space: normal;
   overflow: visible;
 }

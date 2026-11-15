@@ -97,7 +97,7 @@ function GerenciamentoAcervo() {
     .filter((item) => item.tipo === "LIVRO")
     .filter((livro) => {
       const termo = normalizar(pesquisaLivro);
-      return [livro.titulo, livro.autor, livro.genero, livro.idioma]
+      return [livro.titulo, livro.autor, livro.genero, livro.descricao, livro.idioma]
         .some((campo) => normalizar(campo).includes(termo));
     });
 
@@ -251,7 +251,7 @@ function GerenciamentoAcervo() {
                     <td>{revista.mesAnoPublicacao}</td>
                     <td>{revista.ano}</td>
                     <td>{revista.idioma || "N/I"}</td>
-                    <td>{revista.descricao ? revista.descricao : "Sem descrição"}</td>
+                    <td className="coluna-descricao" title={revista.descricao || "Sem descrição"}>{revista.descricao ? revista.descricao : "Sem descrição"}</td>
                     <td>{revista.totalDisponivel}</td>
                     <td>{revista.totalEmprestados}</td>
                     <td>{revista.localizacao}</td>
@@ -278,7 +278,7 @@ function GerenciamentoAcervo() {
         <div className="barra-pesquisa">
           <input
             type="text"
-            placeholder="Pesquisar livro pelo título, autor, gênero, idioma..."
+            placeholder="Pesquisar livro pelo título, autor, gênero, descrição, idioma..."
             value={pesquisaLivro}
             onChange={(e) => setPesquisaLivro(e.target.value)}
           />
@@ -293,6 +293,7 @@ function GerenciamentoAcervo() {
                 <th>Título</th>
                 <th>Autor</th>
                 <th>Gênero</th>
+                <th>Descrição</th>
                 <th>ISBN</th>
                 <th>Ano</th>
                 <th>Idioma</th>
@@ -317,6 +318,9 @@ function GerenciamentoAcervo() {
                     <td>{livro.titulo}</td>
                     <td>{livro.autor}</td>
                     <td>{livro.genero}</td>
+                    <td className="coluna-descricao" title={livro.descricao || "Sem descrição"}>
+                      {livro.descricao ? livro.descricao : "Sem descrição"}
+                    </td>
                     <td>{livro.isbn}</td>
                     <td>{livro.ano}</td>
                     <td>{livro.idioma || "N/I"}</td>
@@ -331,7 +335,7 @@ function GerenciamentoAcervo() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan="12" style={{ textAlign: "center" }}>Nenhum livro encontrado.</td>
+                  <td colSpan="13" style={{ textAlign: "center" }}>Nenhum livro encontrado.</td>
                 </tr>
               )}
             </tbody>
