@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { isTokenExpirado, encerrarSessaoExpirada } from './token';
 
 export const api = axios.create({
     baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8080'
@@ -6,11 +7,35 @@ export const api = axios.create({
 
 api.interceptors.request.use((config) => {
     const token = localStorage.getItem('token');
-    if (token) {
+    const url = config.url || '';
+
+    // Se o token já expirou e não é a rota de login, encerra a sessão imediatamente
+    if (token && !url.includes('/api/auth/login')) {
+        if (isTokenExpirado(token)) {
+            console.warn('Token expirado detectado antes da requisição. Redirecionando para login...');
+            encerrarSessaoExpirada('expirado');
+            return Promise.reject(new Error('Sessão expirada.'));
+        }
         config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
 });
+
+api.interceptors.response.use(
+    (response) => response,
+    (error) => {
+        const status = error.response ? error.response.status : null;
+        const url = error.config?.url || '';
+
+        // Se o backend Spring Boot retornar 401 (Unauthorized) ou 403 (Forbidden) fora do login
+        if ((status === 401 || status === 403) && !url.includes('/api/auth/login')) {
+            console.warn(`Sessão rejeitada pelo servidor (HTTP ${status}). Redirecionando para login...`);
+            encerrarSessaoExpirada('expirado');
+        }
+
+        return Promise.reject(error);
+    }
+);
 
 export async function realizarLogin(email, senha) {
     try {

@@ -5,6 +5,7 @@ import "./Login.css";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../src/context/AuthContext";
 import Alert from '@mui/material/Alert';
+import { isTokenExpirado } from "../../services/token";
 
 const Login = () => {
   const { login } = useAuth();
@@ -12,15 +13,29 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [erro, setErro] = useState(false);
+  const [sessaoExpirada, setSessaoExpirada] = useState(false);
   const [loading, setLoading] = useState(false);
   const [recuperando, setRecuperando] = useState(false);
   const [sucessoMsg, setSucessoMsg] = useState(false);
   const [msgErroRecuperacao, setMsgErroRecuperacao] = useState("");
 
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("sessao") === "expirado") {
+      setSessaoExpirada(true);
+    }
+
     const tokenSalvo = localStorage.getItem("token");
     const usuarioSalvo = localStorage.getItem("usuario");
+
     if (tokenSalvo && usuarioSalvo) {
+      if (isTokenExpirado(tokenSalvo)) {
+        localStorage.removeItem("token");
+        localStorage.removeItem("usuario");
+        setSessaoExpirada(true);
+        return;
+      }
+
       try {
         const dados = JSON.parse(usuarioSalvo);
         if (dados.tipoUsuario === "ADMIN") {
@@ -189,6 +204,13 @@ const Login = () => {
               </button>
               <br />
               <br />
+              {sessaoExpirada && !erro && (
+                <div style={{ marginBottom: "12px" }}>
+                  <Alert variant="filled" severity="warning">
+                    Sua sessão expirou. Por favor, faça login novamente.
+                  </Alert>
+                </div>
+              )}
               {erro && (
                 <Alert variant="filled" severity="error">
                   Usuário ou senha incorretos!
